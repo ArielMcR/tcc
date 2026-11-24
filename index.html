@@ -1,0 +1,3526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Defesa do Kroma</title>
+  <style>
+    :root {
+      /* Segue o modelo de apresentação do IFPR: fundo branco, Arial, título centralizado,
+         número do slide no canto. Verde do logo do IFPR como cor de destaque. */
+      --bg: #FFFFFF;
+      --ink: #111111;
+      --ink-2: #555555;
+      --line: #D9DDD9;
+      --soft: #F5F7F5;
+      --green: #359830;
+      --green-ink: #23701F;
+      --green-dark: #2E6B30;
+      --green-wash: #EAF4E8;
+      --risk: #A30B0D;
+      --letterbox: #2B2B2B;
+      /* cores só de gráfico (validadas: modo claro, superfície branca) */
+      --c-ok: #359830;
+      --c-interp: #2D6FB0;
+      --c-ext: #B07D10;
+
+      --sans: Arial, Helvetica, sans-serif;
+      --mono: Consolas, "Courier New", monospace;
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: var(--letterbox);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    /* ---------- Palco ---------- */
+    .deck {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      counter-reset: s a;
+    }
+
+    .slide {
+      grid-area: 1 / 1;
+      width: min(100vw, calc(100vh * 16 / 9));
+      aspect-ratio: 16 / 9;
+      background: var(--bg);
+      container-type: inline-size;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .25s ease, visibility 0s linear .25s;
+      position: relative;
+      counter-increment: s;
+    }
+
+    .slide[data-appendix] {
+      counter-increment: a;
+    }
+
+    .slide.is-active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .25s ease;
+    }
+
+    .frame {
+      --u: calc(100cqw / 1600);
+      --fs-title: calc(var(--u) * 48);
+      --fs-body: calc(var(--u) * 30);
+      --fs-list: calc(var(--u) * 32);
+      --fs-small: calc(var(--u) * 22);
+      --fs-note: calc(var(--u) * 19);
+      position: absolute;
+      inset: 0;
+      padding: calc(var(--u) * 50) calc(var(--u) * 96) calc(var(--u) * 30);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: calc(var(--u) * 30);
+      font-size: var(--fs-body);
+      line-height: 1.3;
+    }
+
+    .frame>.body {
+      min-height: 0;
+    }
+
+    /* ---------- Tipografia ---------- */
+    h1,
+    h2 {
+      font-weight: 400;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    h2 {
+      font-size: var(--fs-title);
+      text-align: center;
+    }
+
+    h3 {
+      font-size: calc(var(--u) * 27);
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0 0 calc(var(--u) * 12);
+    }
+
+    p {
+      margin: 0;
+    }
+
+    b,
+    strong {
+      font-weight: 700;
+    }
+
+    .small {
+      font-size: var(--fs-small);
+      color: var(--ink-2);
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+
+    .foot {
+      display: flex;
+      align-items: baseline;
+      gap: calc(var(--u) * 40);
+      font-size: var(--fs-note);
+      color: var(--ink-2);
+    }
+
+    .foot>span:first-child {
+      flex: 1;
+    }
+
+    .foot::after {
+      content: counter(s);
+      color: #8A8A8A;
+      min-width: 2ch;
+      text-align: right;
+    }
+
+    .slide[data-appendix] .foot::after {
+      content: "A" counter(a);
+    }
+
+    a {
+      color: var(--green-ink);
+      text-underline-offset: .15em;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 3px solid var(--green);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    ul.list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: calc(var(--u) * 18);
+      font-size: var(--fs-list);
+    }
+
+    ul.list li {
+      padding-left: calc(var(--u) * 30);
+      position: relative;
+    }
+
+    ul.list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .5em;
+      width: calc(var(--u) * 11);
+      height: calc(var(--u) * 11);
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    .callout {
+      padding: calc(var(--u) * 18) calc(var(--u) * 26);
+      background: var(--green-wash);
+      border-left: calc(var(--u) * 6) solid var(--green);
+      font-size: calc(var(--u) * 28);
+    }
+
+    /* ---------- Celular ---------- */
+    .phone {
+      margin: 0;
+      display: grid;
+      gap: calc(var(--u) * 12);
+      justify-items: center;
+      align-content: start;
+    }
+
+    .phone img {
+      display: block;
+      height: var(--ph, calc(var(--u) * 560));
+      width: auto;
+      max-width: 100%;
+      aspect-ratio: 600 / 1219;
+      object-fit: cover;
+      object-position: top;
+      border: calc(var(--u) * 6) solid #222222;
+      border-radius: calc(var(--u) * 32);
+      background: #FFFFFF;
+    }
+
+    .phone figcaption {
+      font-size: calc(var(--u) * 23);
+      color: var(--ink-2);
+      text-align: center;
+      max-width: 20ch;
+    }
+
+    .phones {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: calc(var(--u) * 28);
+    }
+
+    /* ---------- Cartões e números ---------- */
+    .card {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 12);
+      padding: calc(var(--u) * 24) calc(var(--u) * 28);
+    }
+
+    .stat-label {
+      font-size: var(--fs-small);
+      color: var(--ink-2);
+      margin-bottom: calc(var(--u) * 6);
+    }
+
+    .stat-value {
+      font-weight: 700;
+      font-size: calc(var(--u) * 72);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value .unit {
+      font-size: .42em;
+      font-weight: 400;
+      color: var(--ink-2);
+      margin-left: .12em;
+    }
+
+    .stat-note {
+      font-size: var(--fs-small);
+      color: var(--ink-2);
+      margin-top: calc(var(--u) * 10);
+    }
+
+    /* caixas verdes de destaque, como na pré-banca */
+    .tiles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--u) * 22);
+    }
+
+    .tile {
+      background: var(--green-dark);
+      color: #FFFFFF;
+      border-radius: calc(var(--u) * 10);
+      padding: calc(var(--u) * 20) calc(var(--u) * 26);
+      text-align: center;
+    }
+
+    .tile .stat-value {
+      color: #FFFFFF;
+    }
+
+    .tile .stat-value .unit {
+      color: #DDEBDC;
+    }
+
+    .tile .tl {
+      font-size: calc(var(--u) * 24);
+      margin-top: calc(var(--u) * 8);
+    }
+
+    .tile .tn {
+      font-size: calc(var(--u) * 20);
+      color: #DDEBDC;
+      margin-top: calc(var(--u) * 4);
+    }
+
+    .section-label {
+      font-size: var(--fs-small);
+      font-weight: 700;
+      color: var(--ink-2);
+      margin: 0 0 calc(var(--u) * 12);
+    }
+
+    table.data {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: calc(var(--u) * 23);
+    }
+
+    table.data th,
+    table.data td {
+      text-align: left;
+      padding: calc(var(--u) * 9) calc(var(--u) * 10);
+      border-bottom: 1px solid var(--line);
+    }
+
+    table.data th {
+      font-weight: 700;
+      color: var(--ink-2);
+      font-size: calc(var(--u) * 21);
+    }
+
+    table.data td.n,
+    table.data th.n {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.data tr.total td {
+      font-weight: 700;
+      border-bottom: 0;
+    }
+
+    .takeaways {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: calc(var(--u) * 18);
+    }
+
+    .takeaways li {
+      font-size: calc(var(--u) * 23);
+      color: var(--ink-2);
+    }
+
+    .takeaways strong {
+      display: block;
+      font-size: calc(var(--u) * 32);
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    /* ---------- 1. Capa ---------- */
+    .cover {
+      grid-template-rows: auto 1fr auto;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .cover .logo {
+      display: block;
+      height: calc(var(--u) * 112);
+      width: auto;
+    }
+
+    .cover .title-block {
+      align-self: center;
+      display: grid;
+      justify-items: center;
+      gap: calc(var(--u) * 34);
+    }
+
+    .cover h1 {
+      font-size: calc(var(--u) * 50);
+      font-weight: 700;
+      max-width: 30ch;
+    }
+
+    .cover .rule {
+      width: calc(var(--u) * 900);
+      height: calc(var(--u) * 3);
+      background: var(--green);
+    }
+
+    .cover .people {
+      display: grid;
+      gap: calc(var(--u) * 14);
+      font-size: calc(var(--u) * 32);
+    }
+
+    .cover .foot {
+      font-size: var(--fs-small);
+      justify-content: center;
+    }
+
+    .cover .foot>span:first-child {
+      flex: none;
+    }
+
+    .cover .foot::after {
+      content: none;
+    }
+
+    /* ---------- 2. Roteiro ---------- */
+    ol.agenda {
+      list-style: none;
+      margin: 0 auto;
+      padding: 0;
+      counter-reset: ag;
+      align-self: start;
+      width: calc(var(--u) * 1200);
+    }
+
+    ol.agenda li {
+      counter-increment: ag;
+      display: grid;
+      grid-template-columns: calc(var(--u) * 56) calc(var(--u) * 560) 1fr;
+      align-items: baseline;
+      gap: calc(var(--u) * 12);
+      padding: calc(var(--u) * 14) 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    ol.agenda li::before {
+      content: counter(ag) ".";
+      font-weight: 700;
+      font-size: calc(var(--u) * 32);
+      color: var(--green-ink);
+    }
+
+    ol.agenda .t {
+      font-size: calc(var(--u) * 32);
+    }
+
+    ol.agenda .d {
+      color: var(--ink-2);
+      font-size: calc(var(--u) * 23);
+    }
+
+    /* ---------- 3. Contexto ---------- */
+    .problem .body {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 520) 1fr;
+      gap: calc(var(--u) * 52);
+      align-items: center;
+    }
+
+    .photo {
+      margin: 0;
+      display: grid;
+      gap: calc(var(--u) * 12);
+    }
+
+    .photo img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--line);
+    }
+
+    .photo figcaption {
+      font-size: var(--fs-note);
+      color: var(--ink-2);
+    }
+
+    .problem .list {
+      gap: calc(var(--u) * 24);
+    }
+
+    .problem .callout {
+      margin-top: calc(var(--u) * 34);
+    }
+
+    /* ---------- 4. Pergunta e objetivos ---------- */
+    .question .body {
+      display: grid;
+      gap: calc(var(--u) * 26);
+      align-content: center;
+    }
+
+    .q {
+      font-size: calc(var(--u) * 34);
+      line-height: 1.3;
+      padding: calc(var(--u) * 18) calc(var(--u) * 28);
+      border-left: calc(var(--u) * 6) solid var(--green);
+      background: var(--green-wash);
+    }
+
+    .q-sub {
+      font-size: calc(var(--u) * 24);
+      color: var(--ink-2);
+      margin-top: calc(var(--u) * 12);
+      padding-left: calc(var(--u) * 34);
+    }
+
+    .goal {
+      font-size: calc(var(--u) * 27);
+    }
+
+    ol.chips {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: calc(var(--u) * 12);
+      counter-reset: ch;
+    }
+
+    ol.chips li {
+      counter-increment: ch;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 10);
+      padding: calc(var(--u) * 14) calc(var(--u) * 14);
+      font-size: calc(var(--u) * 22);
+      line-height: 1.22;
+      display: grid;
+      align-content: start;
+      gap: calc(var(--u) * 6);
+    }
+
+    ol.chips li::before {
+      content: counter(ch);
+      font-weight: 700;
+      color: var(--green-ink);
+      font-size: calc(var(--u) * 28);
+      line-height: 1;
+    }
+
+    /* ---------- 5. Trabalhos relacionados ---------- */
+    .related .body {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 360) 1fr;
+      gap: calc(var(--u) * 48);
+      align-items: start;
+    }
+
+    .related .left,
+    .related .right {
+      display: grid;
+      gap: calc(var(--u) * 16);
+    }
+
+    .related table.data {
+      font-size: calc(var(--u) * 22);
+    }
+
+    table.matrix {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: calc(var(--u) * 23);
+    }
+
+    table.matrix th,
+    table.matrix td {
+      padding: calc(var(--u) * 8) calc(var(--u) * 6);
+      border-bottom: 1px solid var(--line);
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    table.matrix th:first-child,
+    table.matrix td:first-child {
+      text-align: left;
+      padding-left: 0;
+    }
+
+    table.matrix thead th {
+      font-weight: 700;
+      font-size: calc(var(--u) * 20);
+      color: var(--ink-2);
+    }
+
+    table.matrix .k {
+      background: var(--green-wash);
+    }
+
+    table.matrix thead .k {
+      color: var(--green-ink);
+    }
+
+    .dot {
+      display: inline-block;
+      width: calc(var(--u) * 18);
+      height: calc(var(--u) * 18);
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+
+    .dot.y {
+      background: var(--green);
+    }
+
+    .dot.n {
+      border: calc(var(--u) * 2.5) solid #BFC5BF;
+    }
+
+    .ni {
+      font-size: calc(var(--u) * 16);
+      font-weight: 700;
+      color: var(--ink-2);
+    }
+
+    .legend-t {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: calc(var(--u) * 2) calc(var(--u) * 24);
+      font-size: calc(var(--u) * 18);
+      color: var(--ink-2);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legend-t b {
+      color: var(--green-ink);
+      margin-right: .35em;
+    }
+
+    /* ---------- 6 e 12. Etapas ---------- */
+    .plan .body {
+      display: grid;
+      gap: calc(var(--u) * 40);
+      align-content: center;
+    }
+
+    .lead {
+      font-size: calc(var(--u) * 28);
+      color: var(--ink-2);
+      text-align: center;
+    }
+
+    .steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: calc(var(--u) * 26);
+      counter-reset: step;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: calc(var(--u) * 10);
+      position: relative;
+    }
+
+    .steps li::before {
+      content: counter(step);
+      font-weight: 700;
+      font-size: calc(var(--u) * 56);
+      line-height: 1;
+      color: var(--green);
+    }
+
+    .steps li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: calc(var(--u) * 28);
+      left: calc(var(--u) * 52);
+      right: calc(var(--u) * -12);
+      height: 2px;
+      background: var(--line);
+    }
+
+    .steps h3 {
+      margin: 0;
+    }
+
+    .steps p {
+      font-size: calc(var(--u) * 26);
+      color: var(--ink-2);
+    }
+
+    .steps .result {
+      font-size: calc(var(--u) * 22);
+      font-weight: 700;
+      color: var(--green-ink);
+      border-top: 1px solid var(--line);
+      padding-top: calc(var(--u) * 10);
+    }
+
+    /* ---------- Processo de desenvolvimento ---------- */
+    .proc .body {
+      display: grid;
+      align-items: center;
+    }
+
+    .proc svg,
+    .model svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      font-family: var(--sans);
+    }
+
+    .proc .fl {
+      stroke: var(--green);
+      stroke-width: 2.5;
+      fill: none;
+    }
+
+    .proc .pbox {
+      fill: #FFFFFF;
+      stroke: #8DB889;
+      stroke-width: 2;
+    }
+
+    .proc .pdec {
+      fill: var(--green-wash);
+      stroke: var(--green);
+      stroke-width: 2;
+    }
+
+    .proc .pstart {
+      fill: #FFFFFF;
+      stroke: var(--green);
+      stroke-width: 3;
+    }
+
+    .proc .pend {
+      fill: var(--green-dark);
+    }
+
+    .proc .pnote {
+      fill: var(--green-wash);
+    }
+
+    .proc .pt {
+      fill: var(--ink);
+      font-size: 21px;
+    }
+
+    .proc .pt.pd {
+      font-size: 20px;
+    }
+
+    .proc .pt.pe {
+      fill: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .proc .pt.pnt {
+      font-weight: 700;
+      fill: var(--green-ink);
+    }
+
+    .proc .plab {
+      fill: var(--green-ink);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .proc .plab.pg {
+      fill: var(--ink-2);
+      font-weight: 400;
+    }
+
+    /* ---------- Modelagem do sistema ---------- */
+    .model .body {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 830) 1fr;
+      gap: calc(var(--u) * 48);
+      align-items: center;
+    }
+
+    .model .ml {
+      stroke: #7A867A;
+      stroke-width: 2;
+    }
+
+    .model .mbox {
+      fill: #FFFFFF;
+      stroke: #8DB889;
+      stroke-width: 2;
+    }
+
+    .model .mbox.core {
+      fill: var(--green-dark);
+      stroke: var(--green-dark);
+    }
+
+    .model .mbox.llm {
+      fill: var(--green-wash);
+      stroke: var(--green);
+    }
+
+    .model .mn {
+      fill: var(--ink);
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .model .mk {
+      fill: var(--ink-2);
+      font-size: 16px;
+      font-family: var(--mono);
+    }
+
+    .model .mn.core,
+    .model .mk.core {
+      fill: #FFFFFF;
+    }
+
+    .model .mc {
+      fill: var(--green-ink);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .model .mv {
+      fill: var(--ink-2);
+      font-size: 17px;
+      font-style: italic;
+    }
+
+    .model .list {
+      font-size: calc(var(--u) * 28);
+      gap: calc(var(--u) * 26);
+    }
+
+    /* ---------- 7. Requisitos ---------- */
+    .reqs .body {
+      display: grid;
+      gap: calc(var(--u) * 32);
+      align-content: center;
+    }
+
+    ul.rules {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    ul.rules li {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: calc(var(--u) * 24);
+      padding: calc(var(--u) * 16) 0;
+      border-bottom: 1px solid var(--line);
+      font-size: calc(var(--u) * 29);
+      align-items: baseline;
+    }
+
+    ul.rules .tag {
+      font-family: var(--mono);
+      font-size: calc(var(--u) * 20);
+      color: var(--green-ink);
+      white-space: nowrap;
+    }
+
+    /* ---------- 8. Arquitetura ---------- */
+    .archs .body {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: calc(var(--u) * 26);
+    }
+
+    .arch {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 250) calc(var(--u) * 100) 1fr calc(var(--u) * 128) calc(var(--u) * 250);
+      align-items: center;
+    }
+
+    .node {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 12);
+      padding: calc(var(--u) * 18) calc(var(--u) * 20);
+      display: grid;
+      gap: calc(var(--u) * 6);
+    }
+
+    .node .nt {
+      font-weight: 700;
+      font-size: calc(var(--u) * 29);
+      line-height: 1.1;
+    }
+
+    .node .ns {
+      font-size: calc(var(--u) * 22);
+      color: var(--ink-2);
+      line-height: 1.3;
+    }
+
+    .node.ext {
+      border-style: dashed;
+      border-color: #A9B0A9;
+    }
+
+    .link {
+      display: grid;
+      gap: calc(var(--u) * 8);
+      padding: 0 calc(var(--u) * 10);
+      font-size: calc(var(--u) * 19);
+      color: var(--green-ink);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .arrow {
+      position: relative;
+      height: 2px;
+      background: var(--green);
+      margin: 0 calc(var(--u) * 6);
+    }
+
+    .arrow::after,
+    .arrow::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: calc(var(--u) * 7) solid transparent;
+      border-bottom: calc(var(--u) * 7) solid transparent;
+    }
+
+    .arrow::after {
+      right: calc(var(--u) * -6);
+      border-left: calc(var(--u) * 12) solid var(--green);
+    }
+
+    .arrow::before {
+      left: calc(var(--u) * -6);
+      border-right: calc(var(--u) * 12) solid var(--green);
+    }
+
+    .api {
+      display: grid;
+      gap: calc(var(--u) * 10);
+    }
+
+    .api-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: calc(var(--u) * 12);
+    }
+
+    .api-title .nt {
+      font-weight: 700;
+      font-size: calc(var(--u) * 29);
+    }
+
+    .api-title .ns {
+      font-size: calc(var(--u) * 22);
+      color: var(--ink-2);
+    }
+
+    .layer {
+      border: 1px solid #C9D3C8;
+      border-radius: calc(var(--u) * 12);
+      padding: calc(var(--u) * 12) calc(var(--u) * 16) calc(var(--u) * 16);
+      display: grid;
+      gap: calc(var(--u) * 10);
+    }
+
+    .layer>.ll {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: calc(var(--u) * 12);
+      font-weight: 700;
+      font-size: calc(var(--u) * 21);
+      color: var(--green-ink);
+    }
+
+    .layer>.ll span:last-child {
+      font-weight: 400;
+      color: var(--ink-2);
+      font-size: calc(var(--u) * 20);
+      text-align: right;
+    }
+
+    .layer.l1 {
+      background: #FFFFFF;
+    }
+
+    .layer.l2 {
+      background: #F4F9F3;
+    }
+
+    .layer.l3 {
+      background: #E6F2E4;
+    }
+
+    .layer.l4 {
+      background: #D2E8CF;
+      border-color: var(--green);
+    }
+
+    .arch .right {
+      grid-column: 4 / 6;
+      display: grid;
+      grid-template-columns: calc(var(--u) * 128) calc(var(--u) * 250);
+      row-gap: calc(var(--u) * 56);
+      align-items: center;
+    }
+
+    .archs .callout {
+      font-size: calc(var(--u) * 26);
+    }
+
+    /* ---------- 9. Sistema ---------- */
+    .system .body {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: calc(var(--u) * 24);
+      align-items: start;
+      --ph: calc(var(--u) * 540);
+    }
+
+    /* ---------- Chamada de funções: diagrama ---------- */
+    .fcall .body {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 800) 1fr;
+      gap: calc(var(--u) * 44);
+      align-items: center;
+    }
+
+    .fcall svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      font-family: var(--sans);
+    }
+
+    .fcall .ln {
+      stroke: #CFCFCF;
+      stroke-width: 2;
+    }
+
+    .fcall .fl {
+      stroke: var(--green);
+      stroke-width: 3;
+      fill: none;
+    }
+
+    .fcall .dash {
+      stroke: #9AA59A;
+      stroke-width: 3;
+      stroke-dasharray: 9 8;
+      fill: none;
+    }
+
+    .fcall .pill {
+      fill: #FFFFFF;
+      stroke: #CBD3CB;
+      stroke-width: 1.5;
+    }
+
+    .fcall .pt {
+      fill: var(--ink);
+      font-size: 25px;
+    }
+
+    .fcall .lh {
+      fill: var(--ink);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .fcall .sl {
+      fill: var(--green-ink);
+      font-size: 22px;
+    }
+
+    .fcall .tip {
+      fill: #FFFFFF;
+      stroke: var(--green);
+      stroke-width: 3;
+    }
+
+    .fcall .node {
+      fill: #FFFFFF;
+      stroke: var(--green);
+      stroke-width: 3;
+    }
+
+    .fcall .q-mark {
+      fill: var(--green-ink);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .fcall .side {
+      display: grid;
+      gap: calc(var(--u) * 36);
+    }
+
+    .fcall .list {
+      font-size: calc(var(--u) * 29);
+      gap: calc(var(--u) * 24);
+    }
+
+    .fcall .callout {
+      font-size: calc(var(--u) * 27);
+    }
+
+    /* ---------- 10. Fluxo do assistente ---------- */
+    .assistant .body {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: calc(var(--u) * 56);
+      align-items: start;
+      --ph: calc(var(--u) * 560);
+    }
+
+    .flow {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: calc(var(--u) * 10);
+      counter-reset: f;
+    }
+
+    .flow li {
+      counter-increment: f;
+      display: grid;
+      grid-template-columns: calc(var(--u) * 40) 1fr;
+      gap: calc(var(--u) * 14);
+      align-items: baseline;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 10);
+      padding: calc(var(--u) * 12) calc(var(--u) * 18);
+      font-size: calc(var(--u) * 27);
+    }
+
+    .flow li::before {
+      content: counter(f);
+      font-weight: 700;
+      font-size: calc(var(--u) * 30);
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .flow li.key {
+      border-color: var(--green);
+      background: var(--green-wash);
+    }
+
+    .flow .who {
+      font-weight: 700;
+    }
+
+    .fns {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      justify-content: space-between;
+      gap: calc(var(--u) * 10) calc(var(--u) * 20);
+      margin: calc(var(--u) * 20) 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .fns li {
+      display: grid;
+      gap: calc(var(--u) * 2);
+    }
+
+    .fns .mono {
+      font-size: calc(var(--u) * 19);
+      color: var(--green-ink);
+      font-weight: 700;
+    }
+
+    .fns span:last-child {
+      font-size: var(--fs-note);
+      color: var(--ink-2);
+    }
+
+    /* ---------- 11. Voz e modelo ---------- */
+    .voice .body {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: calc(var(--u) * 56);
+      align-items: start;
+      --ph: calc(var(--u) * 540);
+    }
+
+    .voice .side {
+      display: grid;
+      gap: calc(var(--u) * 28);
+    }
+
+    .voice table.data {
+      font-size: calc(var(--u) * 24);
+    }
+
+    .voice table.data .hi {
+      font-weight: 700;
+      color: var(--green-ink);
+    }
+
+    .voice .list {
+      font-size: calc(var(--u) * 27);
+    }
+
+    /* ---------- Barras ---------- */
+    .hbars {
+      display: grid;
+      gap: calc(var(--u) * 14);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hbar {
+      display: grid;
+      grid-template-columns: var(--lab, calc(var(--u) * 210)) 1fr calc(var(--u) * 84);
+      align-items: center;
+      gap: calc(var(--u) * 14);
+      font-size: calc(var(--u) * 23);
+    }
+
+    .hbar .track {
+      height: calc(var(--u) * 26);
+      position: relative;
+    }
+
+    .hbar .track.base {
+      background: var(--soft);
+      border-radius: 4px;
+    }
+
+    .hbar .fill {
+      display: block;
+      position: relative;
+      height: 100%;
+      width: var(--w);
+      min-width: 2px;
+      background: var(--fc, var(--c-ok));
+      border-radius: 0 4px 4px 0;
+      outline-offset: 2px;
+    }
+
+    .hbar .v {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    [data-tip] {
+      cursor: default;
+    }
+
+    [data-tip]:hover::after,
+    [data-tip]:focus-visible::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: var(--ink);
+      color: #FFFFFF;
+      font-size: max(12px, calc(var(--u) * 18));
+      font-weight: 400;
+      padding: 6px 10px;
+      border-radius: 6px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: calc(var(--u) * 8) calc(var(--u) * 26);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: calc(var(--u) * 21);
+      color: var(--ink-2);
+    }
+
+    .legend li {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--u) * 8);
+    }
+
+    .sw {
+      width: calc(var(--u) * 16);
+      height: calc(var(--u) * 16);
+      border-radius: 3px;
+      flex: none;
+    }
+
+    /* ---------- 13. Requisitos e testes ---------- */
+    .res1 .body {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: calc(var(--u) * 24);
+      align-content: center;
+    }
+
+    .res1 .tiles {
+      grid-column: 1 / -1;
+    }
+
+    .res1 .hbars {
+      gap: calc(var(--u) * 18);
+    }
+
+    .res1 .hbar {
+      --lab: calc(var(--u) * 220);
+      font-size: calc(var(--u) * 26);
+    }
+
+    .res1 .hbar .track {
+      height: calc(var(--u) * 30);
+    }
+
+    .res1 .list {
+      font-size: calc(var(--u) * 27);
+      gap: calc(var(--u) * 20);
+    }
+
+    /* ---------- 14. Antes e depois ---------- */
+    .before .body {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: calc(var(--u) * 44);
+      align-items: center;
+    }
+
+    .before .card {
+      padding: calc(var(--u) * 32) calc(var(--u) * 32);
+    }
+
+    .before .takeaways {
+      gap: calc(var(--u) * 30);
+    }
+
+    .before .takeaways li {
+      font-size: calc(var(--u) * 26);
+    }
+
+    .before .takeaways strong {
+      font-size: calc(var(--u) * 33);
+      margin-bottom: calc(var(--u) * 4);
+    }
+
+    table.cmp {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: calc(var(--u) * 31);
+    }
+
+    table.cmp th,
+    table.cmp td {
+      text-align: left;
+      padding: calc(var(--u) * 20) calc(var(--u) * 14);
+      border-bottom: 1px solid var(--line);
+    }
+
+    table.cmp thead th {
+      font-weight: 700;
+      font-size: calc(var(--u) * 22);
+      color: var(--ink-2);
+    }
+
+    table.cmp td.n,
+    table.cmp th.n {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.cmp .muted {
+      color: var(--ink-2);
+      font-style: italic;
+    }
+
+    table.cmp tr.hl td {
+      background: var(--green-wash);
+    }
+
+    table.cmp td.app {
+      font-weight: 700;
+    }
+
+    /* ---------- 15. Uso real ---------- */
+    .real .body {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 470) 1fr;
+      gap: calc(var(--u) * 28);
+      align-items: center;
+    }
+
+    .real .card {
+      padding: calc(var(--u) * 30) calc(var(--u) * 32);
+    }
+
+    .real .stat-label,
+    .real .stat-note {
+      font-size: calc(var(--u) * 24);
+    }
+
+    .real .left {
+      display: grid;
+      gap: calc(var(--u) * 18);
+    }
+
+    .real .left .stat-value {
+      font-size: calc(var(--u) * 80);
+    }
+
+    .real .right {
+      display: grid;
+      gap: calc(var(--u) * 20);
+      align-content: start;
+    }
+
+    .real .hbars {
+      gap: calc(var(--u) * 20);
+    }
+
+    .real .hbar {
+      --lab: calc(var(--u) * 390);
+      font-size: calc(var(--u) * 26);
+    }
+
+    .real .hbar .track {
+      height: calc(var(--u) * 30);
+    }
+
+    .times {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--u) * 16);
+      border-top: 1px solid var(--line);
+      padding-top: calc(var(--u) * 16);
+    }
+
+    .times .stat-value {
+      font-size: calc(var(--u) * 44);
+    }
+
+    /* ---------- 16. Avaliação controlada ---------- */
+    .res2 .body {
+      display: grid;
+      grid-template-columns: calc(var(--u) * 580) 1fr;
+      gap: calc(var(--u) * 28);
+      align-items: center;
+    }
+
+    .res2 .card {
+      padding: calc(var(--u) * 30) calc(var(--u) * 32);
+    }
+
+    .res2 .stat-label,
+    .res2 .stat-note {
+      font-size: calc(var(--u) * 24);
+    }
+
+    .res2 .takeaways li {
+      font-size: calc(var(--u) * 25);
+    }
+
+    .res2 .takeaways strong {
+      font-size: calc(var(--u) * 34);
+    }
+
+    .res2 .left {
+      display: grid;
+      gap: calc(var(--u) * 18);
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--u) * 20);
+    }
+
+    .pair>div+div {
+      border-left: 1px solid var(--line);
+      padding-left: calc(var(--u) * 20);
+    }
+
+    .trio {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--u) * 14);
+      margin-top: calc(var(--u) * 6);
+    }
+
+    .trio .stat-value {
+      font-size: calc(var(--u) * 48);
+    }
+
+    .bar-wrap {
+      display: grid;
+      gap: calc(var(--u) * 18);
+      align-content: start;
+    }
+
+    .bar {
+      display: flex;
+      gap: 2px;
+      height: calc(var(--u) * 44);
+    }
+
+    .seg {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding-left: calc(var(--u) * 12);
+      font-size: calc(var(--u) * 21);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      border-radius: 4px;
+      outline-offset: 2px;
+    }
+
+    .seg.ok {
+      flex: 101;
+      background: var(--c-ok);
+      color: #FFFFFF;
+    }
+
+    .seg.interp {
+      flex: 8;
+      background: var(--c-interp);
+      color: #FFFFFF;
+    }
+
+    .seg.ext {
+      flex: 17;
+      background: var(--c-ext);
+      color: #FFFFFF;
+    }
+
+    .res2 .takeaways {
+      border-top: 1px solid var(--line);
+      padding-top: calc(var(--u) * 16);
+    }
+
+    /* ---------- 17. Falhas ---------- */
+    .fails .body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--u) * 24);
+      align-content: center;
+    }
+
+    .fail {
+      display: grid;
+      gap: calc(var(--u) * 14);
+      align-content: start;
+      padding: calc(var(--u) * 30) calc(var(--u) * 34);
+    }
+
+    .fail.risk {
+      border-top: calc(var(--u) * 6) solid var(--risk);
+    }
+
+    .fail h3 {
+      margin: 0;
+      font-size: calc(var(--u) * 32);
+    }
+
+    .fail .tagrisk {
+      font-size: calc(var(--u) * 21);
+      font-weight: 700;
+      color: var(--risk);
+    }
+
+    .fail p {
+      font-size: calc(var(--u) * 27);
+      color: var(--ink-2);
+    }
+
+    .fail .cmd {
+      font-family: var(--mono);
+      font-size: calc(var(--u) * 25);
+      color: var(--ink);
+      background: var(--soft);
+      border-radius: calc(var(--u) * 6);
+      padding: calc(var(--u) * 4) calc(var(--u) * 12);
+      justify-self: start;
+    }
+
+    .fail .fix {
+      font-size: calc(var(--u) * 27);
+      color: var(--green-ink);
+      font-weight: 700;
+    }
+
+    .fail .fix::before {
+      content: "→ ";
+    }
+
+    /* ---------- 18. Custo ---------- */
+    .cost .body {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: calc(var(--u) * 36);
+      align-items: center;
+    }
+
+    .cost .card {
+      padding: calc(var(--u) * 28) calc(var(--u) * 32);
+    }
+
+    .formula {
+      font-family: var(--mono);
+      font-size: calc(var(--u) * 34);
+      margin: calc(var(--u) * 6) 0 calc(var(--u) * 24);
+    }
+
+    .formula sub {
+      font-size: .6em;
+    }
+
+    .cost .list {
+      font-size: calc(var(--u) * 28);
+      gap: calc(var(--u) * 18);
+    }
+
+    .cost .unitcost {
+      margin-top: calc(var(--u) * 22);
+      border-top: 1px solid var(--line);
+      padding-top: calc(var(--u) * 16);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: calc(var(--u) * 16);
+    }
+
+    .cost .unitcost .stat-value {
+      font-size: calc(var(--u) * 50);
+    }
+
+    .scen {
+      display: grid;
+      gap: calc(var(--u) * 16);
+    }
+
+    .scen .card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: calc(var(--u) * 32) calc(var(--u) * 32);
+    }
+
+    .scen .stat-value {
+      font-size: calc(var(--u) * 66);
+      color: var(--green-ink);
+    }
+
+    .scen .q-l {
+      font-size: calc(var(--u) * 30);
+    }
+
+    .scen .q-l span {
+      display: block;
+      font-size: var(--fs-note);
+      color: var(--ink-2);
+    }
+
+    /* ---------- 19. Conclusão ---------- */
+    .end .body {
+      display: grid;
+      gap: calc(var(--u) * 32);
+      align-content: center;
+    }
+
+    .end .q {
+      font-size: calc(var(--u) * 29);
+    }
+
+    .end .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--u) * 22);
+    }
+
+    .end .card {
+      display: grid;
+      align-content: start;
+      gap: calc(var(--u) * 6);
+    }
+
+    .end .card {
+      padding: calc(var(--u) * 28) calc(var(--u) * 30);
+    }
+
+    .end .list {
+      font-size: calc(var(--u) * 27);
+      gap: calc(var(--u) * 16);
+    }
+
+    .end .card.done {
+      border-top: calc(var(--u) * 6) solid var(--green);
+    }
+
+    /* ---------- 20. Obrigado ---------- */
+    .thanks .body {
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      text-align: center;
+      gap: calc(var(--u) * 26);
+    }
+
+    .thanks .big {
+      font-size: calc(var(--u) * 96);
+      line-height: 1;
+    }
+
+    .thanks .rule {
+      width: calc(var(--u) * 600);
+      height: calc(var(--u) * 3);
+      background: var(--green);
+    }
+
+    .thanks .people {
+      display: grid;
+      gap: calc(var(--u) * 10);
+      font-size: calc(var(--u) * 32);
+    }
+
+    .thanks .repos {
+      display: grid;
+      gap: calc(var(--u) * 6);
+      font-size: calc(var(--u) * 26);
+      margin-top: calc(var(--u) * 10);
+    }
+
+    /* ---------- 21. Referências ---------- */
+    .refs .body {
+      columns: 2;
+      column-gap: calc(var(--u) * 56);
+      font-size: calc(var(--u) * 20);
+      line-height: 1.3;
+      color: var(--ink-2);
+    }
+
+    .refs .body p {
+      break-inside: avoid;
+      margin: 0 0 calc(var(--u) * 12);
+    }
+
+    .refs .body b {
+      color: var(--ink);
+    }
+
+    /* ---------- Apoio ---------- */
+    .fig .body {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: calc(var(--u) * 32);
+    }
+
+    .fig a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .fig img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border: 1px solid var(--line);
+    }
+
+    .tables .body {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: calc(var(--u) * 40);
+      align-items: start;
+    }
+
+    .tables table.data {
+      font-size: calc(var(--u) * 22);
+    }
+
+    .tables table.data th,
+    .tables table.data td {
+      padding: calc(var(--u) * 8) calc(var(--u) * 8);
+    }
+
+    /* ---------- HUD ---------- */
+    .hud {
+      position: fixed;
+      right: 12px;
+      top: 10px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font: 13px/1 var(--sans);
+      color: var(--ink-2);
+      background: rgba(255, 255, 255, .85);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 6px 4px 12px;
+      opacity: .45;
+      transition: opacity .2s;
+    }
+
+    .hud:hover,
+    .hud:focus-within {
+      opacity: 1;
+    }
+
+    .hud button {
+      font: inherit;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      border-radius: 999px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+    }
+
+    .hud button:hover {
+      background: var(--green-wash);
+    }
+
+    .hud .timer {
+      font-variant-numeric: tabular-nums;
+      padding-right: 4px;
+    }
+
+    .hud .timer[hidden] {
+      display: none;
+    }
+
+    .hud .timer.behind {
+      color: #8A5A00;
+      font-weight: 700;
+    }
+
+    .hud .timer.over {
+      color: var(--risk);
+      font-weight: 700;
+    }
+
+    .progress {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: var(--green);
+      transform-origin: 0 50%;
+      transform: scaleX(.05);
+      transition: transform .25s;
+      z-index: 5;
+    }
+
+    /* ---------- Visão geral (O) e telas estreitas ---------- */
+    body.overview .deck {
+      position: static;
+      display: grid;
+      gap: 24px;
+      padding: 24px;
+      overflow: visible;
+      place-items: start stretch;
+    }
+
+    body.overview .slide {
+      grid-area: auto;
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      opacity: 1;
+      visibility: visible;
+      transition: none;
+      cursor: pointer;
+    }
+
+    body.overview .hud,
+    body.overview .progress {
+      display: none;
+    }
+
+    @media screen and (max-width: 760px) and (orientation: portrait) {
+      .deck {
+        position: static;
+        display: grid;
+        gap: 16px;
+        padding: 16px;
+        overflow: visible;
+        place-items: start stretch;
+      }
+
+      .slide {
+        grid-area: auto;
+        width: 100%;
+        aspect-ratio: auto;
+        opacity: 1;
+        visibility: visible;
+        transition: none;
+      }
+
+      .frame {
+        --u: 0.6px;
+        position: static;
+        padding: 28px 18px;
+        gap: 18px;
+      }
+
+      .hud,
+      .progress {
+        display: none;
+      }
+
+      .problem .body,
+      .related .body,
+      .system .body,
+      .assistant .body,
+      .voice .body,
+      .res1 .body,
+      .before .body,
+      .real .body,
+      .res2 .body,
+      .fails .body,
+      .cost .body,
+      .end .cards,
+      .tables .body,
+      .tiles,
+      .arch,
+      .arch .right {
+        grid-template-columns: 1fr;
+      }
+
+      .arch .right {
+        grid-column: auto;
+      }
+
+      .link {
+        padding: 8px 0;
+      }
+
+      ol.chips,
+      .fns {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      ol.agenda {
+        width: 100%;
+      }
+
+      ol.agenda li {
+        grid-template-columns: 30px 1fr;
+      }
+
+      ol.agenda .d {
+        grid-column: 2;
+      }
+
+      .refs .body {
+        columns: 1;
+      }
+
+      .steps,
+      .phones {
+        grid-template-columns: 1fr;
+      }
+
+      .steps li:not(:last-child)::after {
+        display: none;
+      }
+
+      .system .body,
+      .assistant .body,
+      .voice .body {
+        --ph: 420px;
+      }
+
+      .fig .body {
+        flex-direction: column;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .slide,
+      .slide.is-active,
+      .progress,
+      .hud {
+        transition: none;
+      }
+    }
+
+    @page {
+      size: 1600px 900px;
+      margin: 0;
+    }
+
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        transition: none !important;
+      }
+
+      html,
+      body {
+        height: auto;
+        background: #FFFFFF;
+      }
+
+      .deck {
+        position: static;
+        display: block;
+        overflow: visible;
+      }
+
+      .slide {
+        opacity: 1;
+        visibility: visible;
+        width: 1600px;
+        height: 900px;
+        aspect-ratio: auto;
+        overflow: hidden;
+        break-after: page;
+      }
+
+      .slide:last-child {
+        break-after: auto;
+      }
+
+      .hud,
+      .progress {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="deck" id="deck" aria-roledescription="apresentação"
+    aria-label="Kroma: sistema de gestão para barbearia com interface em linguagem natural">
+
+    <!-- 1. Capa -->
+    <section class="slide is-active" id="slide-1" data-t="20" aria-roledescription="slide" aria-label="Capa">
+      <div class="frame cover">
+        <img class="logo" src="img/ifpr.png" alt="Instituto Federal do Paraná, Campus Paranavaí, e Ministério da Educação"
+          width="1451" height="227">
+        <div class="title-block">
+          <h1>Kroma: Sistema de Gestão para Barbearia com Interface em Linguagem Natural</h1>
+          <div class="rule" aria-hidden="true"></div>
+          <div class="people">
+            <span><b>Acadêmico:</b> Ariel Machado Rodrigues</span>
+            <span><b>Orientador:</b> Prof. Me. Frank Willian Cardoso de Oliveira</span>
+          </div>
+        </div>
+        <div class="foot">
+          <span>Bacharelado em Engenharia de Software · Paranavaí, 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Roteiro -->
+    <section class="slide" id="slide-2" data-t="20" aria-roledescription="slide" aria-label="Roteiro">
+      <div class="frame">
+        <h2>Roteiro</h2>
+        <ol class="agenda body">
+          <li><span class="t">Contextualização e problema</span><span class="d">A barbearia, a pergunta e os
+              objetivos</span></li>
+          <li><span class="t">Trabalhos relacionados</span><span class="d">O que já existe e a lacuna</span></li>
+          <li><span class="t">Metodologia e requisitos</span><span class="d">Estudo de caso, processo e
+              modelagem</span></li>
+          <li><span class="t">Solução desenvolvida</span><span class="d">Arquitetura, backend e aplicativo</span></li>
+          <li><span class="t">Interface em linguagem natural</span><span class="d">Chamada de funções com a API
+              Gemini</span></li>
+          <li><span class="t">Resultados e discussão</span><span class="d">Testes, uso real, avaliação controlada e
+              custo</span></li>
+          <li><span class="t">Conclusão</span><span class="d">Contribuições, limitações e trabalhos futuros</span></li>
+        </ol>
+        <div class="foot"><span></span></div>
+      </div>
+    </section>
+
+    <!-- 3. Contexto -->
+    <section class="slide" id="slide-3" data-t="90" aria-roledescription="slide"
+      aria-label="Contextualização e problema">
+      <div class="frame problem">
+        <h2>Contextualização e problema</h2>
+        <div class="body">
+          <figure class="photo">
+            <img src="img/caderno.jpg"
+              alt="Página de caderno com o faturamento de cada dia da semana de fevereiro somado à mão, total de 10.595 reais"
+              width="720" height="562">
+            <figcaption>Faturamento de fevereiro de 2026, somado à mão no caderno da barbearia.</figcaption>
+          </figure>
+          <div>
+            <ul class="list">
+              <li>Agenda de sexta e sábado no bloco de notas do celular</li>
+              <li>Histórico dos clientes só no WhatsApp e no Instagram</li>
+              <li>Dois clientes no mesmo horário cerca de cinco vezes</li>
+              <li>Dono trabalha sozinho, com as mãos ocupadas</li>
+            </ul>
+            <p class="callout">Por isso, o sistema também aceita pedidos por texto ou voz.</p>
+          </div>
+        </div>
+        <div class="foot">
+          <span>Estudo de caso em uma barbearia de Paranavaí (PR) · setor de beleza com mais de 1 milhão de MEIs
+            (SEBRAE, 2024)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Pergunta e objetivos -->
+    <section class="slide" id="slide-4" data-t="60" aria-roledescription="slide"
+      aria-label="Pergunta de pesquisa e objetivos">
+      <div class="frame question">
+        <h2>Pergunta de pesquisa e objetivos</h2>
+        <div class="body">
+          <div>
+            <p class="q">Em que medida um sistema de gestão mobile, com interface em linguagem natural baseada em
+              chamada de funções, contribui para organizar os processos operacionais de uma barbearia?</p>
+            <p class="q-sub">Complementar: quanto custaria a API do modelo em diferentes volumes mensais de comandos?
+            </p>
+          </div>
+          <p class="goal"><b>Objetivo geral:</b> desenvolver e avaliar um aplicativo móvel com backend para gerir
+            clientes, serviços e agendamentos, com interface em linguagem natural.</p>
+          <div>
+            <p class="section-label">Objetivos específicos</p>
+            <ol class="chips">
+              <li>Levantar requisitos com entrevista e observação</li>
+              <li>Especificar e validar os requisitos</li>
+              <li>Modelar com UML e Clean Architecture</li>
+              <li>Implementar backend e aplicativo</li>
+              <li>Implementar e avaliar o assistente</li>
+              <li>Estimar o custo da API</li>
+              <li>Comparar antes e depois</li>
+            </ol>
+          </div>
+        </div>
+        <div class="foot"><span></span></div>
+      </div>
+    </section>
+
+    <!-- 5. Trabalhos relacionados -->
+    <section class="slide" id="slide-5" data-t="70" aria-roledescription="slide"
+      aria-label="Trabalhos relacionados">
+      <div class="frame related">
+        <h2>Trabalhos relacionados</h2>
+        <div class="body">
+          <div class="left">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Etapa</th>
+                  <th class="n">Domínio</th>
+                  <th class="n">+ Ling. natural</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Resultados</td><td class="n">2.740</td><td class="n">88</td></tr>
+                <tr><td>Título e resumo</td><td class="n">200</td><td class="n">15</td></tr>
+                <tr><td>Critérios</td><td class="n">20</td><td class="n">4</td></tr>
+                <tr class="total"><td>Selecionados</td><td class="n">5</td><td class="n">2</td></tr>
+              </tbody>
+            </table>
+            <p class="small">Google Scholar, em português, de 2019 a 2026. Busca exploratória: a lacuna vale para o
+              conjunto analisado.</p>
+          </div>
+          <div class="right">
+            <table class="matrix">
+              <thead>
+                <tr>
+                  <th>Característica</th>
+                  <th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th><th>T7</th>
+                  <th class="k">Kroma</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Domínio: barbearia ou salão</td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+                <tr>
+                  <td>Aplicativo mobile nativo</td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+                <tr>
+                  <td>Clean Architecture</td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+                <tr>
+                  <td>Testes documentados</td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+                <tr>
+                  <td>Interface conversacional</td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td><span class="dot y"></span><span class="sr">Sim</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+                <tr>
+                  <td>Opera o sistema por linguagem natural</td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+                <tr>
+                  <td>Uso de LLM</td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="dot n"></span><span class="sr">Não</span></td>
+                  <td><span class="ni">NI</span><span class="sr">Não identificado</span></td>
+                  <td><span class="ni">NI</span><span class="sr">Não identificado</span></td>
+                  <td class="k"><span class="dot y"></span><span class="sr">Sim</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <ul class="legend-t">
+              <li><b>T1</b>Two Style (Martins; Fernandes, 2019)</li>
+              <li><b>T5</b>NaRegua (Barbosa et al., 2023)</li>
+              <li><b>T2</b>BeleSys (Tamashiro; Baraçal, 2025)</li>
+              <li><b>T6</b>Projetando chatbots (Lemes, 2020)</li>
+              <li><b>T3</b>Barber Shop System (Anjos, 2025)</li>
+              <li><b>T7</b>Website para estúdio (Dias et al., 2025)</li>
+              <li><b>T4</b>BARCAMS (Furtuna et al., 2024)</li>
+              <li><span class="dot y" style="width:.7em;height:.7em"></span> sim · <span class="dot n"
+                  style="width:.7em;height:.7em"></span> não · <span class="ni">NI</span> não identificado</li>
+            </ul>
+            <p class="callout"><b>Lacuna:</b> nenhum dos sete usa um modelo de linguagem para operar o sistema de
+              gestão.</p>
+          </div>
+        </div>
+        <div class="foot"><span>Tabelas 2.1 e 2.2 da monografia</span></div>
+      </div>
+    </section>
+
+    <!-- Processo de desenvolvimento -->
+    <section class="slide" id="slide-6" data-t="90" aria-roledescription="slide"
+      aria-label="Processo de desenvolvimento">
+      <div class="frame proc">
+        <h2>Processo de desenvolvimento</h2>
+        <div class="body">
+          <svg viewBox="0 0 1400 600" role="img"
+            aria-label="Fluxograma do processo: compreender o processo atual da barbearia, levantamento por entrevista e observação, especificação dos requisitos, validação com o dono; se os requisitos não forem aprovados, volta à especificação. Aprovados, seguem modelagem UML, arquitetura Clean Architecture, backend NestJS com banco MySQL, aplicativo React Native, módulo de linguagem natural e avaliação técnica; se não passar, volta à implementação do backend; se passar, entrega final. A construção foi incremental: cadastros, depois agenda e relatórios, depois o assistente.">
+            <defs>
+              <marker id="pr-ah" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="14" markerHeight="14"
+                markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+                <path d="M2 2 L10 6 L2 10" fill="none" stroke="#359830" stroke-width="2.4" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </marker>
+            </defs>
+
+            <!-- linha 1: requisitos -->
+            <circle cx="50" cy="110" r="26" class="pstart" />
+            <line x1="76" y1="110" x2="114" y2="110" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="120" y="60" width="210" height="100" rx="12" class="pbox" />
+            <text x="225" text-anchor="middle" class="pt"><tspan x="225" y="91">Compreender o</tspan><tspan x="225"
+                y="117">processo atual</tspan><tspan x="225" y="143">da barbearia</tspan></text>
+            <line x1="330" y1="110" x2="374" y2="110" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="380" y="60" width="210" height="100" rx="12" class="pbox" />
+            <text x="485" text-anchor="middle" class="pt"><tspan x="485" y="91">Levantamento:</tspan><tspan x="485"
+                y="117">entrevista e</tspan><tspan x="485" y="143">observação</tspan></text>
+            <line x1="590" y1="110" x2="634" y2="110" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="640" y="60" width="210" height="100" rx="12" class="pbox" />
+            <text x="745" text-anchor="middle" class="pt"><tspan x="745" y="104">Especificação</tspan><tspan x="745"
+                y="130">RF, RNF e RN</tspan></text>
+            <line x1="850" y1="110" x2="894" y2="110" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="900" y="60" width="210" height="100" rx="12" class="pbox" />
+            <text x="1005" text-anchor="middle" class="pt"><tspan x="1005" y="104">Validação</tspan><tspan x="1005"
+                y="130">com o dono</tspan></text>
+            <line x1="1110" y1="110" x2="1134" y2="110" class="fl" marker-end="url(#pr-ah)" />
+            <polygon points="1235,44 1330,110 1235,176 1140,110" class="pdec" />
+            <text x="1235" text-anchor="middle" class="pt pd"><tspan x="1235" y="105">Requisitos</tspan><tspan
+                x="1235" y="129">aprovados?</tspan></text>
+            <path d="M1235 44 V22 H745 V54" class="fl" marker-end="url(#pr-ah)" />
+            <text x="990" y="15" text-anchor="middle" class="plab">Não</text>
+            <path d="M1235 176 V212 H225 V249" class="fl" marker-end="url(#pr-ah)" />
+            <text x="1248" y="202" class="plab">Sim</text>
+
+            <!-- linha 2: projeto e construção -->
+            <rect x="120" y="255" width="210" height="100" rx="12" class="pbox" />
+            <text x="225" text-anchor="middle" class="pt"><tspan x="225" y="299">Modelagem</tspan><tspan x="225"
+                y="325">UML</tspan></text>
+            <line x1="330" y1="305" x2="374" y2="305" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="380" y="255" width="210" height="100" rx="12" class="pbox" />
+            <text x="485" text-anchor="middle" class="pt"><tspan x="485" y="286">Arquitetura</tspan><tspan x="485"
+                y="312">Clean</tspan><tspan x="485" y="338">Architecture</tspan></text>
+            <line x1="590" y1="305" x2="634" y2="305" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="640" y="255" width="210" height="100" rx="12" class="pbox" />
+            <text x="745" text-anchor="middle" class="pt"><tspan x="745" y="299">Backend NestJS</tspan><tspan x="745"
+                y="325">e banco MySQL</tspan></text>
+            <line x1="850" y1="305" x2="894" y2="305" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="900" y="255" width="210" height="100" rx="12" class="pbox" />
+            <text x="1005" text-anchor="middle" class="pt"><tspan x="1005" y="299">Aplicativo</tspan><tspan x="1005"
+                y="325">React Native</tspan></text>
+            <path d="M1005 355 V402 H225 V444" class="fl" marker-end="url(#pr-ah)" />
+
+            <!-- linha 3: assistente e avaliação -->
+            <rect x="120" y="450" width="210" height="100" rx="12" class="pbox" />
+            <text x="225" text-anchor="middle" class="pt"><tspan x="225" y="494">Módulo de</tspan><tspan x="225"
+                y="520">linguagem natural</tspan></text>
+            <line x1="330" y1="500" x2="374" y2="500" class="fl" marker-end="url(#pr-ah)" />
+            <rect x="380" y="450" width="210" height="100" rx="12" class="pbox" />
+            <text x="485" text-anchor="middle" class="pt"><tspan x="485" y="494">Avaliação e</tspan><tspan x="485"
+                y="520">validação técnica</tspan></text>
+            <line x1="590" y1="500" x2="644" y2="500" class="fl" marker-end="url(#pr-ah)" />
+            <polygon points="745,434 840,500 745,566 650,500" class="pdec" />
+            <text x="745" text-anchor="middle" class="pt pd"><tspan x="745" y="495">Passou na</tspan><tspan x="745"
+                y="519">avaliação?</tspan></text>
+            <line x1="745" y1="434" x2="745" y2="364" stroke="#FFFFFF" stroke-width="12" />
+            <line x1="745" y1="434" x2="745" y2="362" class="fl" marker-end="url(#pr-ah)" />
+            <text x="757" y="426" class="plab">Não</text>
+            <line x1="840" y1="500" x2="894" y2="500" class="fl" marker-end="url(#pr-ah)" />
+            <text x="867" y="490" text-anchor="middle" class="plab">Sim</text>
+            <ellipse cx="1005" cy="500" rx="105" ry="44" class="pend" />
+            <text x="1005" y="507" text-anchor="middle" class="pt pe">Entrega final</text>
+
+            <!-- nota: construção incremental -->
+            <rect x="1160" y="255" width="230" height="295" rx="12" class="pnote" />
+            <text x="1180" y="292" class="pt pnt">Construção</text>
+            <text x="1180" y="318" class="pt pnt">incremental</text>
+            <text x="1180" y="362" class="pt">1. Cadastros</text>
+            <text x="1180" y="398" class="pt">2. Agenda e</text>
+            <text x="1206" y="424" class="pt">relatórios</text>
+            <text x="1180" y="460" class="pt">3. Assistente</text>
+            <line x1="1180" y1="482" x2="1370" y2="482" stroke="#B9D3B5" stroke-width="1.5" />
+            <text x="1180" y="512" class="plab pg">Fases em cascata,</text>
+            <text x="1180" y="536" class="plab pg">construção por partes</text>
+          </svg>
+        </div>
+        <div class="foot"><span>Modelo cascata nas fases e incremental na construção (PRESSMAN; MAXIM, 2016)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Requisitos -->
+    <section class="slide" id="slide-7" data-t="60" aria-roledescription="slide" aria-label="Requisitos">
+      <div class="frame reqs">
+        <h2>Requisitos</h2>
+        <div class="body">
+          <div class="tiles">
+            <div class="tile">
+              <p class="stat-value">27</p>
+              <p class="tl">Requisitos funcionais</p>
+            </div>
+            <div class="tile">
+              <p class="stat-value">9</p>
+              <p class="tl">Requisitos não funcionais</p>
+            </div>
+            <div class="tile">
+              <p class="stat-value">22</p>
+              <p class="tl">Regras de negócio</p>
+            </div>
+          </div>
+          <ul class="rules" aria-label="Principais regras de negócio">
+            <li><span>Atendimento de segunda a sábado, das 8h às 12h e das 13h15 às 19h30</span><span
+                class="tag">RN01 · RN02</span></li>
+            <li><span>Nunca dois agendamentos no mesmo horário para o mesmo profissional</span><span
+                class="tag">RN04</span></li>
+            <li><span>Até 7 dias de antecedência; cancelar com menos de 1 h gera cobrança</span><span
+                class="tag">RN09 · RN05</span></li>
+            <li><span>O assistente passa pelas mesmas validações e não exclui nada</span><span class="tag">RN18 ·
+                RN20</span></li>
+          </ul>
+        </div>
+        <div class="foot"><span>Validados com o dono da barbearia · Sommerville (2018); Wiegers e Beatty (2013)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modelagem do sistema -->
+    <section class="slide" id="slide-8" data-t="75" aria-roledescription="slide"
+      aria-label="Modelagem do sistema">
+      <div class="frame model">
+        <h2>Modelagem do sistema</h2>
+        <div class="body">
+          <svg viewBox="0 0 870 540" role="img"
+            aria-label="Modelo de dados simplificado. Um cliente tem vários agendamentos e várias observações. Um usuário atende como profissional em vários agendamentos e emite vários comandos do assistente. Um agendamento é composto por vários itens de agendamento, e cada serviço aparece em vários itens.">
+            <!-- ligações -->
+            <line x1="255" y1="62" x2="310" y2="62" class="ml" />
+            <text x="262" y="52" class="mc">1</text>
+            <text x="300" y="52" class="mc" text-anchor="end">N</text>
+            <line x1="560" y1="62" x2="615" y2="62" class="ml" />
+            <text x="567" y="52" class="mc">1</text>
+            <text x="605" y="52" class="mc" text-anchor="end">N</text>
+            <line x1="130" y1="104" x2="130" y2="230" class="ml" />
+            <text x="140" y="126" class="mc">1</text>
+            <text x="140" y="222" class="mc">N</text>
+            <text x="120" y="172" class="mv" text-anchor="end">possui</text>
+            <line x1="435" y1="104" x2="435" y2="230" class="ml" />
+            <text x="445" y="126" class="mc">N</text>
+            <text x="445" y="222" class="mc">1</text>
+            <text x="425" y="172" class="mv" text-anchor="end">atende</text>
+            <line x1="740" y1="104" x2="740" y2="230" class="ml" />
+            <text x="750" y="126" class="mc">N</text>
+            <text x="750" y="222" class="mc">1</text>
+            <text x="730" y="172" class="mv" text-anchor="end">prestado em</text>
+            <line x1="435" y1="314" x2="435" y2="440" class="ml" />
+            <text x="445" y="336" class="mc">1</text>
+            <text x="445" y="432" class="mc">N</text>
+            <text x="425" y="382" class="mv" text-anchor="end">emite</text>
+
+            <!-- entidades -->
+            <rect x="5" y="20" width="250" height="84" rx="12" class="mbox" />
+            <text x="130" y="57" text-anchor="middle" class="mn">Cliente</text>
+            <text x="130" y="83" text-anchor="middle" class="mk">Client</text>
+
+            <rect x="310" y="20" width="250" height="84" rx="12" class="mbox core" />
+            <text x="435" y="57" text-anchor="middle" class="mn core">Agendamento</text>
+            <text x="435" y="83" text-anchor="middle" class="mk core">Appointment</text>
+
+            <rect x="615" y="20" width="250" height="84" rx="12" class="mbox" />
+            <text x="740" y="57" text-anchor="middle" class="mn">Item do agendamento</text>
+            <text x="740" y="83" text-anchor="middle" class="mk">AppointmentService</text>
+
+            <rect x="5" y="230" width="250" height="84" rx="12" class="mbox" />
+            <text x="130" y="267" text-anchor="middle" class="mn">Observação</text>
+            <text x="130" y="293" text-anchor="middle" class="mk">Observation</text>
+
+            <rect x="310" y="230" width="250" height="84" rx="12" class="mbox" />
+            <text x="435" y="267" text-anchor="middle" class="mn">Usuário</text>
+            <text x="435" y="293" text-anchor="middle" class="mk">User</text>
+
+            <rect x="615" y="230" width="250" height="84" rx="12" class="mbox" />
+            <text x="740" y="267" text-anchor="middle" class="mn">Serviço</text>
+            <text x="740" y="293" text-anchor="middle" class="mk">Service</text>
+
+            <rect x="310" y="440" width="250" height="84" rx="12" class="mbox llm" />
+            <text x="435" y="477" text-anchor="middle" class="mn">Comando do assistente</text>
+            <text x="435" y="503" text-anchor="middle" class="mk">AssistantCommand</text>
+          </svg>
+          <ul class="list">
+            <li>3 perfis em hierarquia: Barbeiro, Supervisor e Administrador</li>
+            <li>Preço e duração de cada serviço congelados no agendamento</li>
+            <li>Cada comando do assistente fica registrado</li>
+            <li>Exclusão lógica preserva o histórico</li>
+          </ul>
+        </div>
+        <div class="foot"><span>Casos de uso, classes e DER completos nos slides de apoio · Figuras 5.1 a 5.4</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Arquitetura -->
+    <section class="slide" id="slide-9" data-t="75" aria-roledescription="slide" aria-label="Arquitetura da solução">
+      <div class="frame archs">
+        <h2>Arquitetura da solução</h2>
+        <div class="body">
+          <div class="arch" role="img"
+            aria-label="Arquitetura: o aplicativo React Native fala com a API Kroma por REST com JWT. A API, em NestJS, tem quatro camadas: frameworks e drivers, adaptadores de interface, casos de uso e entidades. A API chama a API Gemini por chamada de funções e grava no MySQL pelo Prisma ORM.">
+            <div class="node">
+              <span class="nt">Aplicativo</span>
+              <span class="ns">React Native<br>Android e iOS</span>
+              <span class="ns">Telas, formulários e assistente por texto ou voz</span>
+            </div>
+            <div class="link">
+              <span>REST</span>
+              <div class="arrow"></div>
+              <span>JWT</span>
+            </div>
+            <div class="api">
+              <div class="api-title"><span class="nt">API Kroma</span><span class="ns">NestJS · TypeScript</span></div>
+              <div class="layer l1">
+                <div class="ll"><span>Frameworks e drivers</span><span>NestJS, Prisma ORM, MySQL</span></div>
+                <div class="layer l2">
+                  <div class="ll"><span>Adaptadores de interface</span><span>Controllers, presenters,
+                      repositórios</span></div>
+                  <div class="layer l3">
+                    <div class="ll"><span>Casos de uso</span><span>Criar agendamento, cancelar, gerar relatório</span>
+                    </div>
+                    <div class="layer l4">
+                      <div class="ll"><span>Entidades</span><span>Cliente, Serviço, Agendamento, Usuário</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="right">
+              <div class="link">
+                <span>function calling</span>
+                <div class="arrow"></div>
+                <span>SDK Gen AI</span>
+              </div>
+              <div class="node ext">
+                <span class="nt">API Gemini</span>
+                <span class="ns">gemini-3.1-flash-lite<br>Serviço externo</span>
+              </div>
+              <div class="link">
+                <span>Prisma ORM</span>
+                <div class="arrow"></div>
+              </div>
+              <div class="node">
+                <span class="nt">MySQL 8</span>
+                <span class="ns">Dados e registros do assistente</span>
+              </div>
+            </div>
+          </div>
+          <p class="callout">As regras de negócio ficam no centro e não dependem de framework, banco nem IA: o
+            assistente reaproveita as mesmas regras do aplicativo.</p>
+        </div>
+        <div class="foot"><span>Martin (2018); Fielding (2000)</span></div>
+      </div>
+    </section>
+
+    <!-- 9. Sistema -->
+    <section class="slide" id="slide-10" data-t="70" aria-roledescription="slide" aria-label="Sistema desenvolvido">
+      <div class="frame system">
+        <h2>Sistema desenvolvido</h2>
+        <div class="body">
+          <figure class="phone">
+            <img src="img/clientes.jpg"
+              alt="Lista de clientes com nome, telefone, data da última visita e botões de observações, editar e excluir"
+              width="720" height="1473">
+            <figcaption>Clientes e observações</figcaption>
+          </figure>
+          <figure class="phone">
+            <img src="img/servicos.jpg"
+              alt="Lista de cinco serviços com duração e preço, como Corte Masculino de 30 minutos por 40 reais"
+              width="720" height="1463">
+            <figcaption>Serviços com preço e duração</figcaption>
+          </figure>
+          <figure class="phone">
+            <img src="img/novo-agendamento.jpg"
+              alt="Formulário de novo agendamento às 8h com Corte Masculino e Barba Completa, 50 minutos e 70 reais no total"
+              width="720" height="1463">
+            <figcaption>Agendamento com duração e valor somados</figcaption>
+          </figure>
+          <figure class="phone">
+            <img src="img/relatorios.jpg"
+              alt="Tela de relatórios com faturamento do dia, atendimentos na semana e no mês, ticket médio e perdas por cancelamento"
+              width="720" height="1463">
+            <figcaption>Relatórios de faturamento e atendimentos</figcaption>
+          </figure>
+        </div>
+        <div class="foot"><span>Android e iOS a partir de uma única base de código</span></div>
+      </div>
+    </section>
+
+    <!-- Chamada de funções: como o mecanismo funciona -->
+    <section class="slide" id="slide-11" data-t="60" aria-roledescription="slide"
+      aria-label="Chamada de funções">
+      <div class="frame fcall">
+        <h2>Chamada de funções (function calling)</h2>
+        <div class="body">
+          <svg viewBox="55 0 775 600" role="img"
+            aria-label="Fluxo da chamada de funções. A aplicação envia ao Gemini o prompt e a declaração das funções. O Gemini decide o que responder: ou devolve a resposta final, ou devolve o nome da função e os argumentos. A aplicação executa a função e envia o prompt com o resultado. O Gemini decide de novo: devolve a resposta final ou pede outra função.">
+            <defs>
+              <marker id="fc-ah" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="14" markerHeight="14"
+                markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+                <path d="M2 2 L10 6 L2 10" fill="none" stroke="#359830" stroke-width="2.4" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </marker>
+              <marker id="fc-ahg" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="14" markerHeight="14"
+                markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+                <path d="M2 2 L10 6 L2 10" fill="none" stroke="#9AA59A" stroke-width="2.4" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </marker>
+            </defs>
+
+            <!-- raias -->
+            <text x="230" y="32" text-anchor="middle" class="lh">Aplicação</text>
+            <text x="610" y="32" text-anchor="middle" class="lh">Gemini</text>
+            <line x1="230" y1="52" x2="230" y2="592" class="ln" />
+            <line x1="610" y1="52" x2="610" y2="592" class="ln" />
+
+            <!-- 1. prompt + declaração das funções -->
+            <line x1="237" y1="100" x2="603" y2="100" class="fl" marker-end="url(#fc-ah)" />
+            <circle cx="230" cy="100" r="7" class="tip" />
+            <rect x="275" y="62" width="290" height="76" rx="14" class="pill" />
+            <text x="420" y="93" text-anchor="middle" class="pt">Prompt</text>
+            <text x="420" y="123" text-anchor="middle" class="pt">Declaração das funções</text>
+
+            <!-- decisão 1 -->
+            <path d="M610 100 H646 Q660 100 660 114 V281 Q660 295 646 295 H617" class="fl"
+              marker-end="url(#fc-ah)" />
+            <path d="M660 176 Q660 190 646 190 H617" class="fl" marker-end="url(#fc-ah)" />
+            <circle cx="660" cy="145" r="17" class="node" />
+            <text x="660" y="153" text-anchor="middle" class="q-mark">?</text>
+            <text x="688" y="140" class="sl">Decide o que</text>
+            <text x="688" y="166" class="sl">responder</text>
+
+            <!-- 2a. resposta final direta -->
+            <line x1="610" y1="190" x2="237" y2="190" class="fl" />
+            <circle cx="230" cy="190" r="7" class="tip" />
+            <rect x="330" y="166" width="180" height="48" rx="14" class="pill" />
+            <text x="420" y="198" text-anchor="middle" class="pt">Resposta final</text>
+            <text x="214" y="198" text-anchor="end" class="sl">Concluído</text>
+
+            <!-- 2b. nome da função e argumentos -->
+            <line x1="610" y1="295" x2="237" y2="295" class="fl" marker-end="url(#fc-ah)" />
+            <rect x="240" y="271" width="360" height="48" rx="14" class="pill" />
+            <text x="420" y="303" text-anchor="middle" class="pt">Nome da função + argumentos</text>
+
+            <!-- execução na aplicação -->
+            <path d="M230 295 H194 Q180 295 180 309 V386 Q180 400 194 400 H223" class="fl"
+              marker-end="url(#fc-ah)" />
+            <circle cx="180" cy="347" r="17" class="node" />
+            <path d="M174 338 L189 347 L174 356 Z" fill="#359830" />
+            <text x="152" y="342" text-anchor="end" class="sl">Executa</text>
+            <text x="152" y="368" text-anchor="end" class="sl">a função</text>
+
+            <!-- 3. prompt + resultado -->
+            <line x1="230" y1="400" x2="603" y2="400" class="fl" marker-end="url(#fc-ah)" />
+            <rect x="285" y="362" width="270" height="76" rx="14" class="pill" />
+            <text x="420" y="393" text-anchor="middle" class="pt">Prompt</text>
+            <text x="420" y="423" text-anchor="middle" class="pt">Resultado da função</text>
+
+            <!-- decisão 2 -->
+            <path d="M610 400 H646 Q660 400 660 414 V481 Q660 495 646 495 H617" class="fl"
+              marker-end="url(#fc-ah)" />
+            <circle cx="660" cy="447" r="17" class="node" />
+            <text x="660" y="455" text-anchor="middle" class="q-mark">?</text>
+            <text x="688" y="442" class="sl">Decide o que</text>
+            <text x="688" y="468" class="sl">responder</text>
+
+            <!-- 4. resposta final -->
+            <line x1="610" y1="495" x2="237" y2="495" class="fl" />
+            <circle cx="230" cy="495" r="7" class="tip" />
+            <rect x="330" y="471" width="180" height="48" rx="14" class="pill" />
+            <text x="420" y="503" text-anchor="middle" class="pt">Resposta final</text>
+            <text x="214" y="503" text-anchor="end" class="sl">Concluído</text>
+
+            <!-- ou outra função -->
+            <path d="M660 481 V551 Q660 565 646 565 H237" class="dash" marker-end="url(#fc-ahg)" />
+            <rect x="318" y="547" width="204" height="36" fill="#FFFFFF" />
+            <text x="420" y="573" text-anchor="middle" class="pt" style="fill:#555555;font-size:22px">Usar outra
+              função</text>
+          </svg>
+          <div class="side">
+            <ul class="list">
+              <li>A aplicação declara cada função: nome, descrição e parâmetros</li>
+              <li>O modelo escolhe a função e preenche os argumentos</li>
+              <li>A aplicação executa e devolve o resultado ao modelo</li>
+            </ul>
+            <p class="callout"><b>Não elimina erros:</b> o modelo ainda pode escolher mal a função ou inventar
+              parâmetros.</p>
+          </div>
+        </div>
+        <div class="foot"><span>Diagrama adaptado de GOOGLE (2026a)</span></div>
+      </div>
+    </section>
+
+    <!-- 10. Fluxo do assistente -->
+    <section class="slide" id="slide-12" data-t="80" aria-roledescription="slide"
+      aria-label="Interface em linguagem natural">
+      <div class="frame assistant">
+        <h2>Interface em linguagem natural</h2>
+        <div class="body">
+          <div>
+            <ol class="flow">
+              <li><span><span class="who">App:</span> o usuário digita ou fala o pedido</span></li>
+              <li><span><span class="who">API Kroma:</span> envia o texto, a data e as 4 funções ao Gemini</span></li>
+              <li class="key"><span><span class="who">Modelo:</span> escolhe a função e os parâmetros, sem
+                  executar</span></li>
+              <li class="key"><span><span class="who">Backend:</span> executa o caso de uso com as mesmas
+                  validações</span></li>
+              <li><span><span class="who">Modelo:</span> redige a resposta exibida no app</span></li>
+            </ol>
+            <ul class="fns" aria-label="Funções disponíveis ao modelo">
+              <li><span class="mono">QUERY_SCHEDULE</span><span>consultar agenda</span></li>
+              <li><span class="mono">CREATE_APPOINTMENT</span><span>criar agendamento</span></li>
+              <li><span class="mono">REGISTER_CLIENT</span><span>cadastrar cliente</span></li>
+              <li><span class="mono">GENERATE_REPORT</span><span>gerar relatório</span></li>
+            </ul>
+            <p class="callout">O modelo interpreta; quem executa e valida é o backend.</p>
+          </div>
+          <figure class="phone">
+            <img src="img/assistente-texto.jpg"
+              alt="Tela do assistente com o comando de texto para cadastrar o cliente Ariel Machado e a resposta de sucesso da função REGISTER_CLIENT"
+              width="720" height="1463">
+            <figcaption>Comando de texto: cadastro de cliente</figcaption>
+          </figure>
+        </div>
+        <div class="foot"><span>Chamada de funções da API Gemini (GOOGLE, 2026a)</span></div>
+      </div>
+    </section>
+
+    <!-- 11. Voz e escolha do modelo -->
+    <section class="slide" id="slide-13" data-t="60" aria-roledescription="slide"
+      aria-label="Entrada por voz e escolha do modelo">
+      <div class="frame voice">
+        <h2>Entrada por voz e escolha do modelo</h2>
+        <div class="body">
+          <div class="phones">
+            <figure class="phone">
+              <img src="img/assistente-voz.jpg"
+                alt="Tela do assistente gravando um comando de voz, com o aviso gravando, solte para enviar"
+                width="720" height="1463">
+              <figcaption>Segurar para falar</figcaption>
+            </figure>
+            <figure class="phone">
+              <img src="img/assistente-transcrevendo.jpg"
+                alt="Tela do assistente transcrevendo o áudio e depois interpretando o comando"
+                width="720" height="1478">
+              <figcaption>Transcrição e interpretação</figcaption>
+            </figure>
+          </div>
+          <div class="side">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Plano gratuito</th>
+                  <th class="n">2.5-flash</th>
+                  <th class="n">3.1-flash-lite</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Requisições por dia</td><td class="n">20</td><td class="n hi">500</td></tr>
+                <tr><td>Comando de texto</td><td class="n">1,4–10,0 s</td><td class="n hi">1,5–3,2 s</td></tr>
+                <tr><td>Comando de voz</td><td class="n">29,1 s</td><td class="n hi">9,1 s</td></tr>
+              </tbody>
+            </table>
+            <ul class="list">
+              <li>O áudio é transcrito e segue o mesmo fluxo do texto</li>
+              <li>A instrução leva a data de hoje, para entender “amanhã”</li>
+            </ul>
+          </div>
+        </div>
+        <div class="foot"><span>Tabela 6.1 da monografia · o gemini-2.0-flash foi descontinuado durante o
+            desenvolvimento</span></div>
+      </div>
+    </section>
+
+    <!-- 12. Procedimento de avaliação -->
+    <section class="slide" id="slide-14" data-t="60" aria-roledescription="slide"
+      aria-label="Procedimento de avaliação">
+      <div class="frame plan">
+        <h2>Procedimento de avaliação</h2>
+        <div class="body">
+          <p class="lead">Com o dono da barbearia, no uso real, sem tarefas impostas</p>
+          <ol class="steps">
+            <li>
+              <h3>Requisitos</h3>
+              <p>Cada requisito funcional conferido contra a especificação.</p>
+              <p class="result">27 RF verificados</p>
+            </li>
+            <li>
+              <h3>Testes automatizados</h3>
+              <p>Jest no backend: unitários e integração em banco isolado.</p>
+              <p class="result">20/09/2026</p>
+            </li>
+            <li>
+              <h3>Antes e depois</h3>
+              <p>Caderno contra aplicativo, cronometragem manual.</p>
+              <p class="result">1 semana · 50 agendamentos</p>
+            </li>
+            <li>
+              <h3>Assistente</h3>
+              <p>Uso livre e ensaio controlado com respostas esperadas definidas antes.</p>
+              <p class="result">50 comandos · 43 × 3 no ensaio</p>
+            </li>
+          </ol>
+          <p class="callout"><b>Concluir sem erro não é acertar:</b> só o ensaio controlado confere função, parâmetros
+            e efeito.</p>
+        </div>
+        <div class="foot"><span>Seção 7.1 da monografia</span></div>
+      </div>
+    </section>
+
+    <!-- 13. Requisitos e testes -->
+    <section class="slide" id="slide-15" data-t="70" aria-roledescription="slide"
+      aria-label="Resultados: requisitos e testes">
+      <div class="frame res1">
+        <h2>Resultados: requisitos e testes</h2>
+        <div class="body">
+          <div class="tiles">
+            <div class="tile">
+              <p class="stat-value">27 <span class="unit">de 27</span></p>
+              <p class="tl">Requisitos funcionais implementados</p>
+            </div>
+            <div class="tile">
+              <p class="stat-value">127 <span class="unit">de 127</span></p>
+              <p class="tl">Testes aprovados</p>
+              <p class="tn">108 unitários e 19 de integração</p>
+            </div>
+            <div class="tile">
+              <p class="stat-value">52,8<span class="unit">%</span></p>
+              <p class="tl">Cobertura em casos de uso e domínio</p>
+            </div>
+          </div>
+          <div class="card">
+            <p class="stat-label">Cobertura por módulo (destaques)</p>
+            <ul class="hbars" style="margin-top: calc(var(--u) * 12)">
+              <li class="hbar"><span>Agendamentos</span><span class="track base"><span class="fill" style="--w:78.7%"
+                    tabindex="0" data-tip="Agendamentos: 78,7%"></span></span><span class="v">78,7%</span></li>
+              <li class="hbar"><span>Usuários</span><span class="track base"><span class="fill" style="--w:77.1%"
+                    tabindex="0" data-tip="Usuários: 77,1%"></span></span><span class="v">77,1%</span></li>
+              <li class="hbar"><span>Autenticação</span><span class="track base"><span class="fill" style="--w:30.8%"
+                    tabindex="0" data-tip="Autenticação: 30,8%"></span></span><span class="v">30,8%</span></li>
+              <li class="hbar"><span>Observações</span><span class="track base"><span class="fill" style="--w:23.1%"
+                    tabindex="0" data-tip="Observações: 23,1%"></span></span><span class="v">23,1%</span></li>
+              <li class="hbar"><span>Serviços</span><span class="track base"><span class="fill" style="--w:0%"
+                    tabindex="0" data-tip="Serviços: sem cobertura"></span></span><span class="v">0%</span></li>
+            </ul>
+          </div>
+          <div class="card">
+            <p class="stat-label">Limites</p>
+            <ul class="list" style="margin-top: calc(var(--u) * 10)">
+              <li>Medida só em casos de uso e domínio</li>
+              <li>Serviços sem teste automatizado</li>
+              <li>App mobile sem testes automatizados</li>
+            </ul>
+          </div>
+        </div>
+        <div class="foot"><span>Jest 30.1.3 · Tabelas 7.1 a 7.3</span></div>
+      </div>
+    </section>
+
+    <!-- 14. Antes e depois -->
+    <section class="slide" id="slide-16" data-t="75" aria-roledescription="slide"
+      aria-label="Resultados: antes e depois">
+      <div class="frame before">
+        <h2>Resultados: antes e depois</h2>
+        <div class="body">
+          <table class="cmp">
+            <thead>
+              <tr>
+                <th>Indicador</th>
+                <th class="n">Caderno</th>
+                <th class="n">Aplicativo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Tempo para agendar</td><td class="n">18,9 s</td><td class="n app">16,6 s</td></tr>
+              <tr class="hl"><td>Cadastro de cliente</td><td class="n muted">não existia</td><td class="n app">12,6 s</td></tr>
+              <tr class="hl"><td>Cadastro de serviço</td><td class="n muted">não existia</td><td class="n app">10,0 s</td></tr>
+              <tr><td>Conflitos de horário</td><td class="n">0</td><td class="n app">0</td></tr>
+              <tr><td>Retrabalho</td><td class="n">2</td><td class="n app">0</td></tr>
+              <tr><td>Perda de informação</td><td class="n">0</td><td class="n app">0</td></tr>
+            </tbody>
+          </table>
+          <div class="card">
+            <ul class="takeaways">
+              <li><strong>Uma medição por condição</strong>18,9 s contra 16,6 s não comprova ganho de tempo</li>
+              <li><strong>Sem base igual de comparação</strong>o retrabalho de 2 para 0 é só descritivo</li>
+              <li><strong>O ganho mais claro foi centralizar</strong>clientes, serviços e relatórios num só lugar</li>
+            </ul>
+          </div>
+        </div>
+        <div class="foot"><span>Aplicativo pela interface convencional, sem o assistente · Tabela 7.4</span></div>
+      </div>
+    </section>
+
+    <!-- 15. Assistente em uso real -->
+    <section class="slide" id="slide-17" data-t="80" aria-roledescription="slide"
+      aria-label="Resultados: assistente em uso real">
+      <div class="frame real">
+        <h2>Resultados: assistente em uso real</h2>
+        <div class="body">
+          <div class="left">
+            <div class="card">
+              <p class="stat-label">Comandos concluídos sem erro técnico</p>
+              <p class="stat-value">72,0<span class="unit">%</span></p>
+              <p class="stat-note">36 de 50 comandos livres do dono</p>
+            </div>
+            <div class="card">
+              <p class="stat-label">Sem as falhas do serviço externo</p>
+              <p class="stat-value">90,0<span class="unit">%</span></p>
+              <p class="stat-note">36 de 40</p>
+            </div>
+          </div>
+          <div class="card right">
+            <p class="stat-label">Os 14 erros, por causa: 10 vieram do serviço externo</p>
+            <ul class="hbars" aria-label="Erros por causa">
+              <li class="hbar"><span>Indisponibilidade (HTTP 503)</span><span class="track"><span class="fill"
+                    style="--w:100%; --fc: var(--c-ext)" tabindex="0"
+                    data-tip="Serviço externo: 6 de 14"></span></span><span class="v">6</span></li>
+              <li class="hbar"><span>Timeout de 20 s</span><span class="track"><span class="fill"
+                    style="--w:50%; --fc: var(--c-ext)" tabindex="0"
+                    data-tip="Serviço externo: 3 de 14"></span></span><span class="v">3</span></li>
+              <li class="hbar"><span>Modelo indisponível para a chave</span><span class="track"><span class="fill"
+                    style="--w:16.67%; --fc: var(--c-ext)" tabindex="0"
+                    data-tip="Serviço externo: 1 de 14"></span></span><span class="v">1</span></li>
+              <li class="hbar"><span>Requisição inválida (HTTP 400)</span><span class="track"><span class="fill"
+                    style="--w:33.33%; --fc: var(--c-interp)" tabindex="0"
+                    data-tip="Argumentos inválidos: 2 de 14"></span></span><span class="v">2</span></li>
+              <li class="hbar"><span>Barrado pela regra de negócio</span><span class="track"><span class="fill"
+                    style="--w:33.33%; --fc: var(--c-ok)" tabindex="0"
+                    data-tip="Regra funcionou: 2 de 14"></span></span><span class="v">2</span></li>
+            </ul>
+            <ul class="legend">
+              <li><span class="sw" style="background: var(--c-ext)"></span>Serviço externo (10)</li>
+              <li><span class="sw" style="background: var(--c-interp)"></span>Argumentos inválidos (2)</li>
+              <li><span class="sw" style="background: var(--c-ok)"></span>Regra funcionando (2)</li>
+            </ul>
+            <div class="times">
+              <div>
+                <p class="stat-label">Mediana</p>
+                <p class="stat-value">6,5 <span class="unit">s</span></p>
+              </div>
+              <div>
+                <p class="stat-label">Média</p>
+                <p class="stat-value">8,9 <span class="unit">s</span></p>
+              </div>
+              <div>
+                <p class="stat-label">Maior tempo</p>
+                <p class="stat-value">29,1 <span class="unit">s</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>Conclusão técnica, não acerto semântico: os 36 não foram auditados um a um · Tabelas
+            7.5 a 7.7</span></div>
+      </div>
+    </section>
+
+    <!-- 16. Avaliação controlada -->
+    <section class="slide" id="slide-18" data-t="100" aria-roledescription="slide"
+      aria-label="Resultados: avaliação controlada">
+      <div class="frame res2">
+        <h2>Resultados: avaliação controlada</h2>
+        <div class="body">
+          <div class="left">
+            <div class="card">
+              <p class="stat-label">Execuções corretas</p>
+              <div class="pair">
+                <div>
+                  <p class="stat-value">80,2<span class="unit">%</span></p>
+                  <p class="stat-note">101 de 126, todas</p>
+                </div>
+                <div>
+                  <p class="stat-value">92,7<span class="unit">%</span></p>
+                  <p class="stat-note">101 de 109, com o serviço no ar</p>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <p class="stat-label">Comandos que exigem função (63 válidas)</p>
+              <div class="trio">
+                <div>
+                  <p class="stat-value">100<span class="unit">%</span></p>
+                  <p class="stat-note">função certa</p>
+                </div>
+                <div>
+                  <p class="stat-value">95,2<span class="unit">%</span></p>
+                  <p class="stat-note">parâmetros</p>
+                </div>
+                <div>
+                  <p class="stat-value">92,1<span class="unit">%</span></p>
+                  <p class="stat-note">ponta a ponta</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card bar-wrap">
+            <p class="stat-label">42 comandos × 3 passadas = 126 execuções</p>
+            <div class="bar" role="img"
+              aria-label="Desfechos das 126 execuções: 101 com comportamento esperado (80,2%), 8 erros de interpretação (6,3%), 17 falhas do serviço externo (13,5%)">
+              <span class="seg ok" tabindex="0" data-tip="Comportamento esperado: 101 (80,2%)">101</span>
+              <span class="seg interp" tabindex="0" data-tip="Erros de interpretação: 8 (6,3%)"></span>
+              <span class="seg ext" tabindex="0" data-tip="Falha do serviço externo: 17 (13,5%)">17</span>
+            </div>
+            <ul class="legend">
+              <li><span class="sw" style="background: var(--c-ok)"></span>Esperado (101)</li>
+              <li><span class="sw" style="background: var(--c-interp)"></span>Erro de interpretação (8)</li>
+              <li><span class="sw" style="background: var(--c-ext)"></span>Falha do serviço (17)</li>
+            </ul>
+            <ul class="takeaways">
+              <li><strong>19 de 19</strong>violações de regra barradas, nenhum registro criado</li>
+              <li><strong>10 de 10</strong>pedidos fora do escopo recusados</li>
+              <li><strong>27 de 27</strong>comandos com o mesmo desfecho nas 3 passadas</li>
+            </ul>
+          </div>
+        </div>
+        <div class="foot"><span>gemini-3.1-flash-lite, plano gratuito, 20/09/2026 · Tabelas 7.8 e 7.9</span></div>
+      </div>
+    </section>
+
+    <!-- 17. Falhas -->
+    <section class="slide" id="slide-19" data-t="95" aria-roledescription="slide"
+      aria-label="Discussão: falhas encontradas">
+      <div class="frame fails">
+        <h2>Discussão: falhas encontradas</h2>
+        <div class="body">
+          <div class="card fail risk">
+            <p class="tagrisk">⚠ Risco de registro incorreto</p>
+            <h3>Presumiu o que não foi dito</h3>
+            <p class="cmd">“Agenda o Carlos amanhã às 10:00”</p>
+            <p>Sem o serviço, assumiu “corte” e gravou nas 3 passadas.</p>
+            <p class="fix">Pedir o dado ausente antes de gravar</p>
+          </div>
+          <div class="card fail risk">
+            <p class="tagrisk">⚠ Risco de registro duplicado</p>
+            <h3>Gravou, mas respondeu erro</h3>
+            <p>Em 6 execuções o registro foi criado e a resposta final falhou. Repetir o pedido duplica.</p>
+            <p class="fix">Confirmar e evitar duplicidade</p>
+          </div>
+          <div class="card fail">
+            <h3>Serviço externo instável</h3>
+            <p>17 de 126 execuções (13,5%): 10 timeouts e 7 HTTP 503.</p>
+            <p class="fix">Testar outros modelos e o plano pago</p>
+          </div>
+          <div class="card fail">
+            <h3>Datas e limite da função</h3>
+            <p>Data com vírgula, “semana passada” e “dessa semana” lidas fora do esperado.</p>
+            <p class="fix">Consulta por intervalo de datas</p>
+          </div>
+        </div>
+        <div class="foot"><span>Seções 7.6 e 7.8 da monografia</span></div>
+      </div>
+    </section>
+
+    <!-- 18. Custo -->
+    <section class="slide" id="slide-20" data-t="40" aria-roledescription="slide"
+      aria-label="Estimativa de custo da API">
+      <div class="frame cost">
+        <h2>Estimativa de custo da API</h2>
+        <div class="body">
+          <div class="card">
+            <p class="formula">C = (T<sub>e</sub>·P<sub>e</sub> + T<sub>s</sub>·P<sub>s</sub>) / 10⁶</p>
+            <ul class="list">
+              <li>3.000 tokens de entrada e 500 de saída por comando (hipótese)</li>
+              <li>US$ 0,25 e US$ 1,50 por milhão de tokens (preço público)</li>
+              <li>Sem áudio, hospedagem, banco e manutenção</li>
+            </ul>
+            <div class="unitcost">
+              <span class="stat-label">Custo por comando</span>
+              <span class="stat-value">US$ 0,0015</span>
+            </div>
+          </div>
+          <div class="scen">
+            <div class="card">
+              <p class="q-l">200 comandos/mês<span>≈ 50 por semana, como no uso real</span></p>
+              <p class="stat-value">US$ 0,30</p>
+            </div>
+            <div class="card">
+              <p class="q-l">500 comandos/mês</p>
+              <p class="stat-value">US$ 0,75</p>
+            </div>
+            <div class="card">
+              <p class="q-l">1.000 comandos/mês</p>
+              <p class="stat-value">US$ 1,50</p>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span>Ordem de grandeza, não viabilidade econômica · GOOGLE (2026b) · Tabela 7.11</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 19. Conclusão -->
+    <section class="slide" id="slide-21" data-t="90" aria-roledescription="slide" aria-label="Conclusão">
+      <div class="frame end">
+        <h2>Conclusão</h2>
+        <div class="body">
+          <p class="q"><b>Em parte.</b> A centralização organizou a operação e reduziu o retrabalho observado. A
+            linguagem natural é viável como canal alternativo, mas precisa confirmar antes de gravar.</p>
+          <div class="cards">
+            <div class="card done">
+              <h3>Contribuições</h3>
+              <ul class="list">
+                <li>Gestão num só aplicativo</li>
+                <li>Texto e voz com as regras do backend</li>
+                <li>Falhas avaliadas e documentadas</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Limitações</h3>
+              <ul class="list">
+                <li>Um local, um usuário, uma semana</li>
+                <li>Um modelo, plano gratuito</li>
+                <li>Sem testes no app nem usabilidade formal</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Trabalhos futuros</h3>
+              <ul class="list">
+                <li>Confirmar e evitar duplicidade</li>
+                <li>Intervalo de datas e outros modelos</li>
+                <li>Mais estabelecimentos e medições</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="foot"><span></span></div>
+      </div>
+    </section>
+
+    <!-- 20. Obrigado -->
+    <section class="slide" id="slide-22" data-t="5" aria-roledescription="slide" aria-label="Agradecimentos">
+      <div class="frame thanks">
+        <div></div>
+        <div class="body">
+          <p class="big">Obrigado!</p>
+          <div class="rule" aria-hidden="true"></div>
+          <div class="people">
+            <span>Ariel Machado Rodrigues</span>
+            <span><b>Orientador:</b> Prof. Me. Frank Willian Cardoso de Oliveira</span>
+          </div>
+          <div class="repos">
+            <a href="https://github.com/ArielMcR/Kroma">github.com/ArielMcR/Kroma</a>
+            <a href="https://github.com/ArielMcR/API_Kroma">github.com/ArielMcR/API_Kroma</a>
+            <span class="small">20230010210@estudantes.ifpr.edu.br</span>
+          </div>
+        </div>
+        <div class="foot"><span></span></div>
+      </div>
+    </section>
+
+    <!-- 21. Referências -->
+    <section class="slide" id="slide-23" data-t="0" aria-roledescription="slide" aria-label="Referências">
+      <div class="frame refs">
+        <h2>Referências bibliográficas</h2>
+        <div class="body">
+          <p><b>ANJOS, M. B. B.</b> Barber Shop System: um sistema para administração de uma barbearia. TCC — Fatec
+            Prof. Fernando Amaral de Almeida Prado, Araçatuba, 2025.</p>
+          <p><b>BARBOSA, C. A. et al.</b> NaRegua: site para agendamento e gerenciamento de serviços de barbearia. TCC
+            — Etec Prof. Massuyuki Kawano, Tupã, 2023.</p>
+          <p><b>BROWN, T. et al.</b> Language models are few-shot learners. Advances in Neural Information Processing
+            Systems, v. 33, p. 1877–1901, 2020.</p>
+          <p><b>DIAS, K. H. et al.</b> Desenvolvimento de website para estúdio de beleza “Studio Ana Paula”. TCC —
+            Etec Prof. Jadyr Salles, Porto Ferreira, 2025.</p>
+          <p><b>FIELDING, R. T.</b> Architectural Styles and the Design of Network-based Software Architectures. Tese
+            (PhD) — University of California, Irvine, 2000.</p>
+          <p><b>FURTUNA, H. G. et al.</b> BARCAMS: sistema de gestão de estabelecimento de estética masculina. TCC —
+            Etec de Poá, 2024.</p>
+          <p><b>GOOGLE.</b> Function calling with the Gemini API. 2026a.</p>
+          <p><b>GOOGLE.</b> Gemini Developer API pricing. 2026b.</p>
+          <p><b>LEMES, J. S.</b> Projetando chatbots: extraindo informações de canais de atendimento. Dissertação
+            (Mestrado) — PUC-SP, São Paulo, 2020.</p>
+          <p><b>MARTIN, R. C.</b> Clean Architecture: a craftsman’s guide to software structure and design. Prentice
+            Hall, 2018.</p>
+          <p><b>MARTINS, E. F. R.; FERNANDES, T. A.</b> Two Style: um software de agendamento e gerenciamento. TCC —
+            IFRN, Lajes, 2019.</p>
+          <p><b>PRESSMAN, R. S.; MAXIM, B. R.</b> Engenharia de Software: uma abordagem profissional. 8. ed. AMGH,
+            2016.</p>
+          <p><b>SEBRAE.</b> Setor de beleza tem mais de 524 novos negócios abertos por dia em 2023. 2024.</p>
+          <p><b>SOMMERVILLE, I.</b> Engenharia de Software. 10. ed. Pearson, 2018.</p>
+          <p><b>TAMASHIRO, M. N.; BARAÇAL, M. J. F.</b> BeleSys: sistema de gestão multiplataforma para salões de
+            beleza. TCC — Fatec Rubens Lara, Santos, 2025.</p>
+          <p><b>WIEGERS, K.; BEATTY, J.</b> Software Requirements. 3. ed. Microsoft Press, 2013.</p>
+          <p><b>WOHLIN, C. et al.</b> Experimentation in Software Engineering. Springer, 2012.</p>
+          <p>Lista completa na monografia.</p>
+        </div>
+        <div class="foot"><span></span></div>
+      </div>
+    </section>
+
+    <!-- A2. Casos de uso -->
+    <section class="slide" id="slide-24" data-appendix aria-roledescription="slide"
+      aria-label="Apoio: diagramas de casos de uso">
+      <div class="frame fig">
+        <h2>Diagramas de casos de uso</h2>
+        <div class="body">
+          <a href="img/casos-uso-operacao.png" target="_blank" rel="noopener"><img src="img/casos-uso-operacao.png"
+              alt="Diagrama de casos de uso de operação: autenticação, agenda, clientes e serviços, com os atores Barbeiro, Supervisor e Administrador"
+              width="1041" height="2019"></a>
+          <a href="img/casos-uso-gestao.png" target="_blank" rel="noopener"><img src="img/casos-uso-gestao.png"
+              alt="Diagrama de casos de uso de gestão: assistente em linguagem natural, relatórios e administração"
+              width="1128" height="1500"></a>
+        </div>
+        <div class="foot"><span>Apoio · clique na imagem para abrir em tamanho real · Figuras 5.1 e 5.2</span></div>
+      </div>
+    </section>
+
+    <!-- A3. Diagrama de classes -->
+    <section class="slide" id="slide-25" data-appendix aria-roledescription="slide"
+      aria-label="Apoio: diagrama de classes">
+      <div class="frame fig">
+        <h2>Diagrama de classes</h2>
+        <div class="body">
+          <a href="img/diagrama-classes.png" target="_blank" rel="noopener"><img src="img/diagrama-classes.png"
+              alt="Diagrama de classes com Default, User, Client, Service, Appointment, AppointmentService, Observation, AssistantCommand, Settings e o validador de agenda"
+              width="2318" height="1158"></a>
+        </div>
+        <div class="foot"><span>Apoio · clique na imagem para abrir em tamanho real · Figura 5.3</span></div>
+      </div>
+    </section>
+
+    <!-- A4. DER -->
+    <section class="slide" id="slide-26" data-appendix aria-roledescription="slide"
+      aria-label="Apoio: diagrama entidade-relacionamento">
+      <div class="frame fig">
+        <h2>Diagrama entidade-relacionamento</h2>
+        <div class="body">
+          <a href="img/der.png" target="_blank" rel="noopener"><img src="img/der.png"
+              alt="Diagrama entidade-relacionamento com Appointment no centro, ligado a Client, User e Service por AppointmentService, além de Observation, AssistantCommand, Settings, LoginAttempt e OperationLog"
+              width="2278" height="1151"></a>
+        </div>
+        <div class="foot"><span>Apoio · clique na imagem para abrir em tamanho real · Figura 5.4</span></div>
+      </div>
+    </section>
+
+    <!-- A5. Avaliação controlada por categoria -->
+    <section class="slide" id="slide-27" data-appendix aria-roledescription="slide"
+      aria-label="Apoio: avaliação controlada por categoria">
+      <div class="frame tables">
+        <h2>Avaliação controlada por categoria</h2>
+        <div class="body">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th class="n">Cmd.</th>
+                <th class="n">Exec.</th>
+                <th class="n">Falha</th>
+                <th class="n">Válidas</th>
+                <th class="n">Corretas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A · Consultar agenda</td><td class="n">4</td><td class="n">12</td><td class="n">3</td><td class="n">9</td><td class="n">9</td></tr>
+              <tr><td>B · Criar agendamento</td><td class="n">5</td><td class="n">15</td><td class="n">4</td><td class="n">11</td><td class="n">9</td></tr>
+              <tr><td>C · Cadastrar cliente</td><td class="n">4</td><td class="n">12</td><td class="n">2</td><td class="n">10</td><td class="n">10</td></tr>
+              <tr><td>D · Gerar relatório</td><td class="n">4</td><td class="n">12</td><td class="n">0</td><td class="n">12</td><td class="n">12</td></tr>
+              <tr><td>E · Referência temporal</td><td class="n">4</td><td class="n">12</td><td class="n">2</td><td class="n">10</td><td class="n">7</td></tr>
+              <tr><td>F · Violação de regra</td><td class="n">7</td><td class="n">21</td><td class="n">2</td><td class="n">19</td><td class="n">19</td></tr>
+              <tr><td>G · Fora do escopo</td><td class="n">4</td><td class="n">12</td><td class="n">2</td><td class="n">10</td><td class="n">10</td></tr>
+              <tr><td>H · Incompleto ou ambíguo</td><td class="n">3</td><td class="n">9</td><td class="n">0</td><td class="n">9</td><td class="n">6</td></tr>
+              <tr><td>I · Comandos reais (sem I04)</td><td class="n">7</td><td class="n">21</td><td class="n">2</td><td class="n">19</td><td class="n">19</td></tr>
+              <tr class="total"><td>Total</td><td class="n">42</td><td class="n">126</td><td class="n">17</td><td class="n">109</td><td class="n">101</td></tr>
+            </tbody>
+          </table>
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Comando (regra)</th>
+                <th class="n">Modelo recusou</th>
+                <th class="n">Validador barrou</th>
+                <th class="n">Falha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>F01 Conflito de horário</td><td class="n">0</td><td class="n">2</td><td class="n">1</td></tr>
+              <tr><td>F02 Serviço inexistente</td><td class="n">0</td><td class="n">3</td><td class="n">0</td></tr>
+              <tr><td>F03 Domingo</td><td class="n">3</td><td class="n">0</td><td class="n">0</td></tr>
+              <tr><td>F04 Cliente inexistente</td><td class="n">0</td><td class="n">3</td><td class="n">0</td></tr>
+              <tr><td>F05 Fora do expediente</td><td class="n">2</td><td class="n">0</td><td class="n">1</td></tr>
+              <tr><td>F06 Antecedência máxima</td><td class="n">3</td><td class="n">0</td><td class="n">0</td></tr>
+              <tr><td>F07 Data passada</td><td class="n">3</td><td class="n">0</td><td class="n">0</td></tr>
+              <tr class="total"><td>Total · nenhum registro criado</td><td class="n">11</td><td class="n">8</td><td class="n">2</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="foot"><span>Apoio · regras do prompt foram recusadas pelo modelo; as que dependem do banco, pelo
+            validador · Tabelas 7.8 e 7.9</span></div>
+      </div>
+    </section>
+
+    <!-- A6. Testes por módulo -->
+    <section class="slide" id="slide-28" data-appendix aria-roledescription="slide"
+      aria-label="Apoio: testes por módulo e cobertura">
+      <div class="frame tables">
+        <h2>Testes por módulo e cobertura</h2>
+        <div class="body">
+          <table class="data">
+            <thead>
+              <tr>
+                <th>Módulo</th>
+                <th class="n">Unitários</th>
+                <th class="n">Integração</th>
+                <th class="n">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Agendamentos</td><td class="n">25</td><td class="n">5</td><td class="n">30</td></tr>
+              <tr><td>Usuários</td><td class="n">26</td><td class="n">0</td><td class="n">26</td></tr>
+              <tr><td>Clientes</td><td class="n">16</td><td class="n">5</td><td class="n">21</td></tr>
+              <tr><td>Relatórios</td><td class="n">16</td><td class="n">2</td><td class="n">18</td></tr>
+              <tr><td>Período (comum)</td><td class="n">9</td><td class="n">0</td><td class="n">9</td></tr>
+              <tr><td>Autenticação</td><td class="n">4</td><td class="n">4</td><td class="n">8</td></tr>
+              <tr><td>Assistente (LLM)</td><td class="n">7</td><td class="n">0</td><td class="n">7</td></tr>
+              <tr><td>Observações</td><td class="n">5</td><td class="n">2</td><td class="n">7</td></tr>
+              <tr><td>Inicialização da aplicação</td><td class="n">0</td><td class="n">1</td><td class="n">1</td></tr>
+              <tr><td>Serviços</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr>
+              <tr class="total"><td>Total · todos aprovados</td><td class="n">108</td><td class="n">19</td><td class="n">127</td></tr>
+            </tbody>
+          </table>
+          <div>
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Métrica</th>
+                  <th class="n">Cobertura</th>
+                  <th class="n">Absoluto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Statements</td><td class="n">52,82%</td><td class="n">383/725</td></tr>
+                <tr><td>Branches</td><td class="n">64,45%</td><td class="n">194/301</td></tr>
+                <tr><td>Functions</td><td class="n">38,05%</td><td class="n">51/134</td></tr>
+                <tr><td>Lines</td><td class="n">56,16%</td><td class="n">346/616</td></tr>
+              </tbody>
+            </table>
+            <p class="small" style="margin-top: calc(var(--u) * 16)">Medida só nas camadas de casos de uso e domínio.
+              Execução de 20/09/2026, Node.js 22.12.0, Jest 30.1.3, commit 62866ce.</p>
+          </div>
+        </div>
+        <div class="foot"><span>Apoio · Tabelas 7.2 e 7.3</span></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <nav class="hud" aria-label="Navegação da apresentação">
+    <span class="timer" id="timer" hidden aria-label="Tempo decorrido">0:00 / 30:00</span>
+    <button type="button" id="prev" aria-label="Slide anterior">←</button>
+    <span id="counter" aria-live="polite">1 / 21</span>
+    <button type="button" id="next" aria-label="Próximo slide">→</button>
+  </nav>
+
+  <script>
+    (function () {
+      var TOTAL_MIN = 30;
+      var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+      var counter = document.getElementById('counter');
+      var progress = document.getElementById('progress');
+      var timerEl = document.getElementById('timer');
+      var narrow = window.matchMedia('screen and (max-width: 760px) and (orientation: portrait)');
+      var current = 0;
+      var startedAt = null;
+      var tick = null;
+
+      // Slides principais e de apoio, e o tempo planejado acumulado até o fim de cada slide.
+      var mainCount = 0, planEnd = [], acc = 0;
+      slides.forEach(function (s) {
+        if (!s.hasAttribute('data-appendix')) mainCount++;
+        acc += parseInt(s.getAttribute('data-t') || '0', 10);
+        planEnd.push(acc);
+      });
+
+      if (/overview/.test(location.search)) document.body.classList.add('overview');
+
+      function stacked() { return document.body.classList.contains('overview') || narrow.matches; }
+
+      function label(k) {
+        if (k < mainCount) return (k + 1) + ' / ' + mainCount;
+        return 'Apoio ' + (k - mainCount + 1);
+      }
+
+      function render() {
+        var isStacked = stacked();
+        slides.forEach(function (s, k) {
+          var on = k === current;
+          s.classList.toggle('is-active', on);
+          var hidden = !on && !isStacked;
+          s.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+          s.inert = hidden;
+        });
+        counter.textContent = label(current);
+        progress.style.transform = 'scaleX(' + Math.min(1, (current + 1) / mainCount) + ')';
+        if (!timerEl.hidden) updateTimer();
+      }
+
+      function go(n, fromHash) {
+        n = Math.max(0, Math.min(slides.length - 1, n));
+        if (n > 0 && startedAt === null) startedAt = Date.now();
+        current = n;
+        render();
+        if (!fromHash) {
+          var h = '#slide-' + (n + 1);
+          if (location.hash !== h) { try { location.replace(h); } catch (e) { } }
+        }
+      }
+
+      function fromHash() {
+        var m = /^#slide-(\d+)$/.exec(location.hash);
+        if (m) go(parseInt(m[1], 10) - 1, true);
+      }
+
+      function fmt(ms) {
+        var s = Math.floor(ms / 1000);
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+      }
+      // Cronômetro: fica âmbar quando o tempo passa do planejado para o slide atual
+      // (com 20 s de folga) e vermelho depois dos 20 minutos.
+      function updateTimer() {
+        var ms = startedAt === null ? 0 : Date.now() - startedAt;
+        timerEl.textContent = fmt(ms) + ' / ' + TOTAL_MIN + ':00';
+        var over = ms > TOTAL_MIN * 60 * 1000;
+        var behind = !over && current < mainCount && ms > (planEnd[current] + 20) * 1000;
+        timerEl.classList.toggle('over', over);
+        timerEl.classList.toggle('behind', behind);
+      }
+      function toggleTimer() {
+        timerEl.hidden = !timerEl.hidden;
+        if (!timerEl.hidden) { updateTimer(); tick = setInterval(updateTimer, 1000); }
+        else { clearInterval(tick); }
+      }
+      function toggleFullscreen() {
+        try {
+          if (document.fullscreenElement) document.exitFullscreen();
+          else if (document.documentElement.requestFullscreen) {
+            var p = document.documentElement.requestFullscreen();
+            if (p && p.catch) p.catch(function () { });
+          }
+        } catch (e) { }
+      }
+      function toggleOverview() {
+        document.body.classList.toggle('overview');
+        render();
+        if (stacked()) slides[current].scrollIntoView({ block: 'start' });
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+        var k = e.key;
+        if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Enter') {
+          if (stacked() || (k === 'Enter' && e.target.closest && e.target.closest('a, button'))) return;
+          e.preventDefault(); go(current + 1);
+        } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') {
+          if (stacked()) return;
+          e.preventDefault(); go(current - 1);
+        } else if (k === 'Home') { if (!stacked()) { e.preventDefault(); go(0); } }
+        else if (k === 'End') { if (!stacked()) { e.preventDefault(); go(mainCount - 1); } }
+        else if (k === 'f' || k === 'F') { toggleFullscreen(); }
+        else if (k === 't' || k === 'T') { toggleTimer(); }
+        else if (k === 'r' || k === 'R') { startedAt = current > 0 ? Date.now() : null; if (!timerEl.hidden) updateTimer(); }
+        else if (k === 'o' || k === 'O' || k === 'Escape') {
+          if (k === 'Escape' && !document.body.classList.contains('overview')) return;
+          toggleOverview();
+        }
+      });
+
+      document.getElementById('prev').addEventListener('click', function () { go(current - 1); });
+      document.getElementById('next').addEventListener('click', function () { go(current + 1); });
+
+      slides.forEach(function (s, k) {
+        s.addEventListener('click', function (e) {
+          if (e.target.closest('a, button, [data-tip]')) return;
+          if (document.body.classList.contains('overview')) {
+            document.body.classList.remove('overview');
+            go(k);
+            return;
+          }
+          if (narrow.matches) return;
+          go(current + 1);
+        });
+      });
+
+      var touchX = null;
+      document.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+      document.addEventListener('touchend', function (e) {
+        if (touchX === null || stacked()) return;
+        var dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
+        touchX = null;
+      });
+
+      window.addEventListener('hashchange', fromHash);
+      if (narrow.addEventListener) narrow.addEventListener('change', render);
+      fromHash();
+      render();
+    })();
+  </script>
+</body>
+
+</html>
