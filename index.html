@@ -250,6 +250,82 @@
       gap: calc(var(--u) * 28);
     }
 
+    /* ---------- Demonstração em vídeo ---------- */
+    .phone video {
+      display: block;
+      height: var(--ph, calc(var(--u) * 560));
+      width: auto;
+      max-width: 100%;
+      aspect-ratio: 720 / 1564;
+      object-fit: cover;
+      border: calc(var(--u) * 6) solid #222222;
+      border-radius: calc(var(--u) * 32);
+      background: #FFFFFF;
+    }
+
+    .phone .print-poster {
+      display: none;
+      aspect-ratio: 720 / 1564;
+    }
+
+    /* slide do vídeo: espaçamentos menores para o celular ocupar toda a altura útil */
+    .frame.demo {
+      gap: calc(var(--u) * 14);
+      padding-bottom: calc(var(--u) * 18);
+    }
+
+    .demo .body {
+      display: grid;
+      place-items: center;
+      --ph: calc(var(--u) * 722);
+    }
+
+    .demo .side {
+      display: grid;
+      gap: calc(var(--u) * 6);
+    }
+
+    ol.chapters {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: calc(var(--u) * 10);
+    }
+
+    ol.chapters button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: calc(var(--u) * 76) 1fr;
+      gap: calc(var(--u) * 12);
+      align-items: baseline;
+      text-align: left;
+      font: inherit;
+      font-size: calc(var(--u) * 25);
+      line-height: 1.25;
+      color: var(--ink);
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 10);
+      padding: calc(var(--u) * 12) calc(var(--u) * 18);
+      cursor: pointer;
+    }
+
+    ol.chapters button:hover {
+      border-color: var(--green);
+    }
+
+    ol.chapters button.is-current {
+      background: var(--green-wash);
+      border-color: var(--green);
+    }
+
+    ol.chapters .tc {
+      font-weight: 700;
+      color: var(--green-ink);
+      font-variant-numeric: tabular-nums;
+    }
+
     /* ---------- Cartões e números ---------- */
     .card {
       background: #FFFFFF;
@@ -499,7 +575,7 @@
     /* ---------- 4. Pergunta e objetivos ---------- */
     .question .body {
       display: grid;
-      gap: calc(var(--u) * 26);
+      gap: calc(var(--u) * 40);
       align-content: center;
     }
 
@@ -519,7 +595,7 @@
     }
 
     .goal {
-      font-size: calc(var(--u) * 27);
+      font-size: calc(var(--u) * 30);
     }
 
     ol.chips {
@@ -536,8 +612,8 @@
       counter-increment: ch;
       border: 1px solid var(--line);
       border-radius: calc(var(--u) * 10);
-      padding: calc(var(--u) * 14) calc(var(--u) * 14);
-      font-size: calc(var(--u) * 22);
+      padding: calc(var(--u) * 16) calc(var(--u) * 16);
+      font-size: calc(var(--u) * 25);
       line-height: 1.22;
       display: grid;
       align-content: start;
@@ -555,30 +631,27 @@
     /* ---------- 5. Trabalhos relacionados ---------- */
     .related .body {
       display: grid;
-      grid-template-columns: calc(var(--u) * 360) 1fr;
-      gap: calc(var(--u) * 48);
-      align-items: start;
+      align-content: center;
     }
 
-    .related .left,
     .related .right {
       display: grid;
-      gap: calc(var(--u) * 16);
+      gap: calc(var(--u) * 20);
     }
 
-    .related table.data {
-      font-size: calc(var(--u) * 22);
+    .related .legend-t {
+      font-size: calc(var(--u) * 20);
     }
 
     table.matrix {
       width: 100%;
       border-collapse: collapse;
-      font-size: calc(var(--u) * 23);
+      font-size: calc(var(--u) * 27);
     }
 
     table.matrix th,
     table.matrix td {
-      padding: calc(var(--u) * 8) calc(var(--u) * 6);
+      padding: calc(var(--u) * 10) calc(var(--u) * 6);
       border-bottom: 1px solid var(--line);
       text-align: center;
       vertical-align: middle;
@@ -592,7 +665,7 @@
 
     table.matrix thead th {
       font-weight: 700;
-      font-size: calc(var(--u) * 20);
+      font-size: calc(var(--u) * 23);
       color: var(--ink-2);
     }
 
@@ -606,8 +679,8 @@
 
     .dot {
       display: inline-block;
-      width: calc(var(--u) * 18);
-      height: calc(var(--u) * 18);
+      width: calc(var(--u) * 21);
+      height: calc(var(--u) * 21);
       border-radius: 50%;
       vertical-align: middle;
     }
@@ -1725,6 +1798,84 @@
       border-top: calc(var(--u) * 6) solid var(--green);
     }
 
+    /* ---------- Conclusão: resposta à pergunta e próximos passos ---------- */
+    .concl .body {
+      gap: calc(var(--u) * 34);
+    }
+
+    .concl .answer-line {
+      text-align: center;
+      font-size: calc(var(--u) * 32);
+    }
+
+    .concl .answer-line b {
+      color: var(--green-ink);
+    }
+
+    .concl .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--u) * 24);
+    }
+
+    .concl .ans {
+      background: var(--green-dark);
+      color: #FFFFFF;
+      border-radius: calc(var(--u) * 12);
+      padding: calc(var(--u) * 26) calc(var(--u) * 32);
+      display: grid;
+      gap: calc(var(--u) * 8);
+    }
+
+    .concl .al {
+      font-size: calc(var(--u) * 22);
+      color: #DDEBDC;
+    }
+
+    .concl .ab {
+      font-size: calc(var(--u) * 42);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .concl .as {
+      font-size: calc(var(--u) * 25);
+      color: #EEF6ED;
+    }
+
+    ul.nexts {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--u) * 20);
+    }
+
+    ul.nexts li {
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 12);
+      padding: calc(var(--u) * 20) calc(var(--u) * 24);
+      display: grid;
+      gap: calc(var(--u) * 10);
+      align-content: start;
+    }
+
+    ul.nexts .lim {
+      font-size: calc(var(--u) * 23);
+      color: var(--ink-2);
+    }
+
+    ul.nexts .nx {
+      font-size: calc(var(--u) * 27);
+      font-weight: 700;
+      color: var(--green-ink);
+    }
+
+    ul.nexts .nx::before {
+      content: "→ ";
+    }
+
     /* ---------- 20. Obrigado ---------- */
     .thanks .body {
       display: grid;
@@ -2068,8 +2219,13 @@
       }
 
       .hud,
-      .progress {
+      .progress,
+      .phone video {
         display: none;
+      }
+
+      .phone .print-poster {
+        display: block;
       }
     }
   </style>
@@ -2154,23 +2310,19 @@
       <div class="frame question">
         <h2>Pergunta de pesquisa e objetivos</h2>
         <div class="body">
-          <div>
-            <p class="q">Em que medida um sistema de gestão mobile, com interface em linguagem natural baseada em
-              chamada de funções, contribui para organizar os processos operacionais de uma barbearia?</p>
-            <p class="q-sub">Complementar: quanto custaria a API do modelo em diferentes volumes mensais de comandos?
-            </p>
-          </div>
-          <p class="goal"><b>Objetivo geral:</b> desenvolver e avaliar um aplicativo móvel com backend para gerir
-            clientes, serviços e agendamentos, com interface em linguagem natural.</p>
+          <p class="q">Em que medida um sistema de gestão mobile, com interface em linguagem natural baseada em
+            chamada de funções, contribui para organizar os processos operacionais de uma barbearia?</p>
+          <p class="goal"><b>Objetivo geral:</b> desenvolver e avaliar um app de gestão com interface em linguagem
+            natural.</p>
           <div>
             <p class="section-label">Objetivos específicos</p>
             <ol class="chips">
-              <li>Levantar requisitos com entrevista e observação</li>
-              <li>Especificar e validar os requisitos</li>
-              <li>Modelar com UML e Clean Architecture</li>
-              <li>Implementar backend e aplicativo</li>
-              <li>Implementar e avaliar o assistente</li>
-              <li>Estimar o custo da API</li>
+              <li>Levantar requisitos</li>
+              <li>Especificar e validar</li>
+              <li>Modelar</li>
+              <li>Implementar</li>
+              <li>Avaliar o assistente</li>
+              <li>Estimar o custo</li>
               <li>Comparar antes e depois</li>
             </ol>
           </div>
@@ -2185,25 +2337,6 @@
       <div class="frame related">
         <h2>Trabalhos relacionados</h2>
         <div class="body">
-          <div class="left">
-            <table class="data">
-              <thead>
-                <tr>
-                  <th>Etapa</th>
-                  <th class="n">Domínio</th>
-                  <th class="n">+ Ling. natural</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Resultados</td><td class="n">2.740</td><td class="n">88</td></tr>
-                <tr><td>Título e resumo</td><td class="n">200</td><td class="n">15</td></tr>
-                <tr><td>Critérios</td><td class="n">20</td><td class="n">4</td></tr>
-                <tr class="total"><td>Selecionados</td><td class="n">5</td><td class="n">2</td></tr>
-              </tbody>
-            </table>
-            <p class="small">Google Scholar, em português, de 2019 a 2026. Busca exploratória: a lacuna vale para o
-              conjunto analisado.</p>
-          </div>
           <div class="right">
             <table class="matrix">
               <thead>
@@ -2308,7 +2441,7 @@
               gestão.</p>
           </div>
         </div>
-        <div class="foot"><span>Tabelas 2.1 e 2.2 da monografia</span></div>
+        <div class="foot"><span>Busca exploratória no Google Scholar, de 2019 a 2026 · Tabela 2.2 da monografia</span></div>
       </div>
     </section>
 
@@ -2319,7 +2452,7 @@
         <h2>Processo de desenvolvimento</h2>
         <div class="body">
           <svg viewBox="0 0 1400 600" role="img"
-            aria-label="Fluxograma do processo: compreender o processo atual da barbearia, levantamento por entrevista e observação, especificação dos requisitos, validação com o dono; se os requisitos não forem aprovados, volta à especificação. Aprovados, seguem modelagem UML, arquitetura Clean Architecture, backend NestJS com banco MySQL, aplicativo React Native, módulo de linguagem natural e avaliação técnica; se não passar, volta à implementação do backend; se passar, entrega final. A construção foi incremental: cadastros, depois agenda e relatórios, depois o assistente.">
+            aria-label="Fluxograma do processo: compreender o processo atual da barbearia, levantamento por entrevista e observação, especificação e validação dos requisitos; se os requisitos não forem aprovados, volta à especificação. Aprovados, seguem modelagem UML, arquitetura Clean Architecture, backend NestJS com banco MySQL, aplicativo React Native, módulo de linguagem natural e avaliação técnica; se não passar, volta à implementação do backend; se passar, entrega final. A construção foi incremental: cadastros, depois agenda e relatórios, depois o assistente.">
             <defs>
               <marker id="pr-ah" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="14" markerHeight="14"
                 markerUnits="userSpaceOnUse" orient="auto-start-reverse">
@@ -2345,7 +2478,7 @@
             <line x1="850" y1="110" x2="894" y2="110" class="fl" marker-end="url(#pr-ah)" />
             <rect x="900" y="60" width="210" height="100" rx="12" class="pbox" />
             <text x="1005" text-anchor="middle" class="pt"><tspan x="1005" y="104">Validação</tspan><tspan x="1005"
-                y="130">com o dono</tspan></text>
+                y="130">dos requisitos</tspan></text>
             <line x1="1110" y1="110" x2="1134" y2="110" class="fl" marker-end="url(#pr-ah)" />
             <polygon points="1235,44 1330,110 1235,176 1140,110" class="pdec" />
             <text x="1235" text-anchor="middle" class="pt pd"><tspan x="1235" y="105">Requisitos</tspan><tspan
@@ -2580,37 +2713,21 @@
       </div>
     </section>
 
-    <!-- 9. Sistema -->
-    <section class="slide" id="slide-10" data-t="70" aria-roledescription="slide" aria-label="Sistema desenvolvido">
-      <div class="frame system">
+    <!-- 9. Sistema (vídeo do aplicativo em uso) -->
+    <section class="slide" id="slide-10" data-t="90" aria-roledescription="slide" aria-label="Sistema desenvolvido">
+      <div class="frame demo">
         <h2>Sistema desenvolvido</h2>
         <div class="body">
           <figure class="phone">
-            <img src="img/clientes.jpg"
-              alt="Lista de clientes com nome, telefone, data da última visita e botões de observações, editar e excluir"
-              width="720" height="1473">
-            <figcaption>Clientes e observações</figcaption>
-          </figure>
-          <figure class="phone">
-            <img src="img/servicos.jpg"
-              alt="Lista de cinco serviços com duração e preço, como Corte Masculino de 30 minutos por 40 reais"
-              width="720" height="1463">
-            <figcaption>Serviços com preço e duração</figcaption>
-          </figure>
-          <figure class="phone">
-            <img src="img/novo-agendamento.jpg"
-              alt="Formulário de novo agendamento às 8h com Corte Masculino e Barba Completa, 50 minutos e 70 reais no total"
-              width="720" height="1463">
-            <figcaption>Agendamento com duração e valor somados</figcaption>
-          </figure>
-          <figure class="phone">
-            <img src="img/relatorios.jpg"
-              alt="Tela de relatórios com faturamento do dia, atendimentos na semana e no mês, ticket médio e perdas por cancelamento"
-              width="720" height="1463">
-            <figcaption>Relatórios de faturamento e atendimentos</figcaption>
+            <video src="video/demo-sistema.mp4" poster="img/demo-sistema-capa.jpg" muted playsinline preload="auto"
+              controls width="720" height="1564"
+              aria-label="Gravação de tela do Kroma: agenda, serviços, cadastro de cliente, agendamento barrado por data passada, agendamento com dois serviços, detalhes do agendamento e relatórios"></video>
+            <img class="print-poster" src="img/demo-sistema-capa.jpg"
+              alt="Formulário de novo agendamento com o cliente Ariel teste e os serviços Navalhado e Degradê selecionados"
+              width="720" height="1564">
           </figure>
         </div>
-        <div class="foot"><span>Android e iOS a partir de uma única base de código</span></div>
+        <div class="foot"><span></span></div>
       </div>
     </section>
 
@@ -2743,10 +2860,13 @@
             <p class="callout">O modelo interpreta; quem executa e valida é o backend.</p>
           </div>
           <figure class="phone">
-            <img src="img/assistente-texto.jpg"
-              alt="Tela do assistente com o comando de texto para cadastrar o cliente Ariel Machado e a resposta de sucesso da função REGISTER_CLIENT"
-              width="720" height="1463">
-            <figcaption>Comando de texto: cadastro de cliente</figcaption>
+            <video src="video/demo-assistente.mp4" poster="img/demo-assistente-capa.jpg" muted playsinline
+              preload="auto" controls width="720" height="1564"
+              aria-label="Gravação de tela do assistente: pergunta quanto foi faturado no mês e quais são os agendamentos de hoje"></video>
+            <img class="print-poster" src="img/demo-assistente-capa.jpg"
+              alt="Tela do assistente respondendo quanto foi faturado no mês, com a função GENERATE_REPORT"
+              width="720" height="1564">
+            <figcaption>Relatório e agenda pedidos ao assistente</figcaption>
           </figure>
         </div>
         <div class="foot"><span>Chamada de funções da API Gemini (GOOGLE, 2026a)</span></div>
@@ -3118,36 +3238,32 @@
 
     <!-- 19. Conclusão -->
     <section class="slide" id="slide-21" data-t="90" aria-roledescription="slide" aria-label="Conclusão">
-      <div class="frame end">
+      <div class="frame end concl">
         <h2>Conclusão</h2>
         <div class="body">
-          <p class="q"><b>Em parte.</b> A centralização organizou a operação e reduziu o retrabalho observado. A
-            linguagem natural é viável como canal alternativo, mas precisa confirmar antes de gravar.</p>
-          <div class="cards">
-            <div class="card done">
-              <h3>Contribuições</h3>
-              <ul class="list">
-                <li>Gestão num só aplicativo</li>
-                <li>Texto e voz com as regras do backend</li>
-                <li>Falhas avaliadas e documentadas</li>
-              </ul>
+          <p class="answer-line">Resposta à pergunta de pesquisa: <b>em parte</b></p>
+          <div class="answers">
+            <div class="ans">
+              <p class="al">Gestão da barbearia</p>
+              <p class="ab">Organizou a operação</p>
+              <p class="as">Informações centralizadas e retrabalho reduzido no período observado</p>
             </div>
-            <div class="card">
-              <h3>Limitações</h3>
-              <ul class="list">
-                <li>Um local, um usuário, uma semana</li>
-                <li>Um modelo, plano gratuito</li>
-                <li>Sem testes no app nem usabilidade formal</li>
-              </ul>
+            <div class="ans">
+              <p class="al">Assistente em linguagem natural</p>
+              <p class="ab">Viável, com ressalvas</p>
+              <p class="as">92,7% de acerto com o serviço no ar, mas precisa confirmar antes de gravar</p>
             </div>
-            <div class="card">
-              <h3>Trabalhos futuros</h3>
-              <ul class="list">
-                <li>Confirmar e evitar duplicidade</li>
-                <li>Intervalo de datas e outros modelos</li>
-                <li>Mais estabelecimentos e medições</li>
-              </ul>
-            </div>
+          </div>
+          <div>
+            <p class="section-label">Limitações e próximos passos</p>
+            <ul class="nexts">
+              <li><span class="lim">Um estabelecimento, uma semana</span><span class="nx">Mais barbearias e medições
+                  repetidas</span></li>
+              <li><span class="lim">Modelo presume dados e pode duplicar registros</span><span class="nx">Confirmar antes
+                  de gravar</span></li>
+              <li><span class="lim">Sem testes no app nem avaliação de usabilidade</span><span class="nx">Testes no app e
+                  avaliação formal de usabilidade</span></li>
+            </ul>
           </div>
         </div>
         <div class="foot"><span></span></div>
@@ -3415,6 +3531,7 @@
           s.setAttribute('aria-hidden', hidden ? 'true' : 'false');
           s.inert = hidden;
         });
+        syncVideos(isStacked);
         counter.textContent = label(current);
         progress.style.transform = 'scaleX(' + Math.min(1, (current + 1) / mainCount) + ')';
         if (!timerEl.hidden) updateTimer();
@@ -3474,7 +3591,7 @@
         if (e.altKey || e.ctrlKey || e.metaKey) return;
         var k = e.key;
         if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Enter') {
-          if (stacked() || (k === 'Enter' && e.target.closest && e.target.closest('a, button'))) return;
+          if (stacked() || ((k === 'Enter' || k === ' ') && e.target.closest && e.target.closest('a, button, video'))) return;
           e.preventDefault(); go(current + 1);
         } else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') {
           if (stacked()) return;
@@ -3495,7 +3612,7 @@
 
       slides.forEach(function (s, k) {
         s.addEventListener('click', function (e) {
-          if (e.target.closest('a, button, [data-tip]')) return;
+          if (e.target.closest('a, button, [data-tip], video')) return;
           if (document.body.classList.contains('overview')) {
             document.body.classList.remove('overview');
             go(k);
@@ -3513,6 +3630,48 @@
         var dx = e.changedTouches[0].clientX - touchX;
         if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
         touchX = null;
+      });
+
+      // Vídeo de demonstração: começa do início ao entrar no slide e pausa ao sair.
+      var lastActive = -1;
+      function syncVideos(isStacked) {
+        slides.forEach(function (s, k) {
+          var v = s.querySelector('video');
+          if (!v) return;
+          if (k === current && !isStacked) {
+            if (lastActive !== current) {
+              try {
+                v.currentTime = 0;
+                var p = v.play();
+                if (p && p.catch) p.catch(function () { });
+              } catch (e) { }
+            }
+          } else if (!v.paused) {
+            v.pause();
+          }
+        });
+        lastActive = current;
+      }
+
+      // Botões de trecho: pulam para o momento do vídeo e destacam o trecho em exibição.
+      Array.prototype.slice.call(document.querySelectorAll('ol.chapters')).forEach(function (list) {
+        var v = list.closest('.slide').querySelector('video');
+        var btns = Array.prototype.slice.call(list.querySelectorAll('[data-seek]'));
+        if (!v) return;
+        btns.forEach(function (b) {
+          b.addEventListener('click', function () {
+            try {
+              v.currentTime = parseFloat(b.getAttribute('data-seek'));
+              var p = v.play();
+              if (p && p.catch) p.catch(function () { });
+            } catch (e) { }
+          });
+        });
+        v.addEventListener('timeupdate', function () {
+          var t = v.currentTime, idx = 0;
+          btns.forEach(function (b, i) { if (t >= parseFloat(b.getAttribute('data-seek'))) idx = i; });
+          btns.forEach(function (b, i) { b.classList.toggle('is-current', i === idx); });
+        });
       });
 
       window.addEventListener('hashchange', fromHash);
