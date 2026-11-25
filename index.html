@@ -572,6 +572,42 @@
       margin-top: calc(var(--u) * 34);
     }
 
+    /* ---------- 3. Contexto: três evidências em imagem ---------- */
+    .context .body {
+      display: grid;
+      gap: calc(var(--u) * 34);
+      align-content: center;
+    }
+
+    .evid {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: calc(var(--u) * 44);
+    }
+
+    .evid figure {
+      margin: 0;
+      display: grid;
+      gap: calc(var(--u) * 12);
+      justify-items: center;
+    }
+
+    .evid img {
+      display: block;
+      height: calc(var(--u) * 470);
+      width: auto;
+      border: 1px solid var(--line);
+      border-radius: calc(var(--u) * 8);
+    }
+
+    .evid figcaption {
+      font-size: calc(var(--u) * 24);
+      color: var(--ink-2);
+      text-align: center;
+      text-wrap: balance;
+    }
+
     /* ---------- 4. Pergunta e objetivos ---------- */
     .question .body {
       display: grid;
@@ -2278,24 +2314,31 @@
     <!-- 3. Contexto -->
     <section class="slide" id="slide-3" data-t="90" aria-roledescription="slide"
       aria-label="Contextualização e problema">
-      <div class="frame problem">
+      <div class="frame context">
         <h2>Contextualização e problema</h2>
         <div class="body">
-          <figure class="photo">
-            <img src="img/caderno.jpg"
-              alt="Página de caderno com o faturamento de cada dia da semana de fevereiro somado à mão, total de 10.595 reais"
-              width="720" height="562">
-            <figcaption>Faturamento de fevereiro de 2026, somado à mão no caderno da barbearia.</figcaption>
-          </figure>
-          <div>
-            <ul class="list">
-              <li>Agenda de sexta e sábado no bloco de notas do celular</li>
-              <li>Histórico dos clientes só no WhatsApp e no Instagram</li>
-              <li>Dois clientes no mesmo horário cerca de cinco vezes</li>
-              <li>Dono trabalha sozinho, com as mãos ocupadas</li>
-            </ul>
-            <p class="callout">Por isso, o sistema também aceita pedidos por texto ou voz.</p>
+          <div class="evid">
+            <figure>
+              <img src="img/caderno.jpg"
+                alt="Página de caderno com o faturamento de cada dia da semana de fevereiro somado à mão, total de 10.595 reais"
+                width="720" height="562">
+              <figcaption>Faturamento somado à mão no caderno</figcaption>
+            </figure>
+            <figure>
+              <img src="img/notas-sabado.jpg"
+                alt="Agenda de sábado no bloco de notas do celular, com os horários e o primeiro nome de cada cliente"
+                width="242" height="523">
+              <figcaption>Agenda no bloco de notas</figcaption>
+            </figure>
+            <figure>
+              <img src="img/whatsapp-audio.jpg"
+                alt="Conversa de WhatsApp em que o cliente pede horário para sábado e o dono responde com mensagens de áudio"
+                width="541" height="540">
+              <figcaption>Pedidos pelo WhatsApp, respondidos por áudio</figcaption>
+            </figure>
           </div>
+          <p class="callout">O dono trabalha sozinho e já responde por áudio: por isso o sistema também aceita pedidos
+            por voz.</p>
         </div>
         <div class="foot">
           <span>Estudo de caso em uma barbearia de Paranavaí (PR) · setor de beleza com mais de 1 milhão de MEIs
